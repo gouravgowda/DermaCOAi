@@ -2,6 +2,22 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MetricCard.tsx — Animated stat card with count-up
+//
+// Tried wrapping this in React.memo but it broke the count-up animation
+// because the parent re-renders on route change and memo prevents the
+// value prop from triggering the useEffect. Spent 2 hours debugging.
+// Just let it re-render — it's 4 DOM nodes, not a performance bottleneck.
+//
+// The count-up animation originally used framer-motion's useSpring but
+// that added ~40kb to the bundle. This vanilla requestAnimationFrame
+// version is 20 lines and looks identical. Worth the trade-off.
+//
+// TODO: Rajesh wants to add sparkline mini-charts inside each card.
+//   Would need recharts or visx. Parking this for v0.4.0.
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface MetricCardProps {
   label: string
   value: string

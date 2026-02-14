@@ -1,0 +1,147 @@
+﻿[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 2468 modules transformed.
+node.exe : 
+[31m✗[39m Build 
+failed in 5.48s
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Users\GOURAV 
+GOWDA\AppData\R ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ([31m✗   
+ [39m Build faile    
+d in 5.48s:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+[31merror during 
+build:
+[31msrc/lib/stores/i
+ndex.ts (3:29): "mock
+TreatmentProtocol" 
+is not exported by "s
+rc/assets/mock-data/m
+ock-patients.ts", 
+imported by "src/lib/
+stores/index.ts".[31
+m
+file: 
+[36mC:/Users/GOURAV 
+GOWDA/OneDrive/Deskto
+p/Derma scope ai/fron
+tend/src/lib/stores/i
+ndex.ts:3:29[31m
+[33m
+1: import { create } 
+from 'zustand'
+2: import type { 
+AnalysisResult, 
+TreatmentProtocol } 
+from '@/types'
+3: import { 
+mockAnalysisResult, m
+ockTreatmentProtocol 
+} from '@/assets/mock
+-data/mock-patients'
+                     
+           ^
+4: 
+5: // ───────────────
+─────────────────────
+──────────
+[31m
+    at 
+getRollupError (file:
+///C:/Users/GOURAV%20
+GOWDA/OneDrive/Deskto
+p/Derma%20scope%20ai/
+frontend/node_modules
+/rollup/dist/es/share
+d/parseAst.js:402:41)
+    at error (file://
+/C:/Users/GOURAV%20GO
+WDA/OneDrive/Desktop/
+Derma%20scope%20ai/fr
+ontend/node_modules/r
+ollup/dist/es/shared/
+parseAst.js:398:42)
+    at Module.error (
+file:///C:/Users/GOUR
+AV%20GOWDA/OneDrive/D
+esktop/Derma%20scope%
+20ai/frontend/node_mo
+dules/rollup/dist/es/
+shared/node-entry.js:
+17040:16)
+    at 
+Module.traceVariable 
+(file:///C:/Users/GOU
+RAV%20GOWDA/OneDrive/
+Desktop/Derma%20scope
+%20ai/frontend/node_m
+odules/rollup/dist/es
+/shared/node-entry.js
+:17452:29)
+    at ModuleScope.fi
+ndVariable (file:///C
+:/Users/GOURAV%20GOWD
+A/OneDrive/Desktop/De
+rma%20scope%20ai/fron
+tend/node_modules/rol
+lup/dist/es/shared/no
+de-entry.js:15070:39)
+    at ReturnValueSco
+pe.findVariable (file
+:///C:/Users/GOURAV%2
+0GOWDA/OneDrive/Deskt
+op/Derma%20scope%20ai
+/frontend/node_module
+s/rollup/dist/es/shar
+ed/node-entry.js:5673
+:38)
+    at FunctionBodySc
+ope.findVariable (fil
+e:///C:/Users/GOURAV%
+20GOWDA/OneDrive/Desk
+top/Derma%20scope%20a
+i/frontend/node_modul
+es/rollup/dist/es/sha
+red/node-entry.js:567
+3:38)
+    at ReturnValueSco
+pe.findVariable (file
+:///C:/Users/GOURAV%2
+0GOWDA/OneDrive/Deskt
+op/Derma%20scope%20ai
+/frontend/node_module
+s/rollup/dist/es/shar
+ed/node-entry.js:5673
+:38)
+    at FunctionBodySc
+ope.findVariable (fil
+e:///C:/Users/GOURAV%
+20GOWDA/OneDrive/Desk
+top/Derma%20scope%20a
+i/frontend/node_modul
+es/rollup/dist/es/sha
+red/node-entry.js:567
+3:38)
+    at BlockScope.fin
+dVariable (file:///C:
+/Users/GOURAV%20GOWDA
+/OneDrive/Desktop/Der
+ma%20scope%20ai/front
+end/node_modules/roll
+up/dist/es/shared/nod
+e-entry.js:5673:38)[
+39m

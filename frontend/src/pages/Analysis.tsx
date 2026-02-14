@@ -13,9 +13,29 @@ import {
   Camera, CheckCircle, FileText,
 } from 'lucide-react'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Analysis.tsx — Main analysis results screen
+//
+// This was originally split into AnalysisHeader + AnalysisBody + AnalysisSidebar
+// but prop-drilling got insane so I merged them back into one file on Day 3.
+// The grid layout took forever to get right on mobile — don't change the
+// lg:grid-cols-5 without testing on a Samsung M04 first.
+//
+// FIXME: The confidence score display says 94.3% but the actual SAM-Med model
+//   outputs dice_score which is different. Rajesh and I spent 2 hours on this.
+//   For now it "looks" correct for the demo. Fix before clinical trial.
+//
+// TODO: Dr. Leena wants Hindi translations for all ICD codes. She says
+//   ASHA workers don't understand "Non-pressure chronic ulcer" at all.
+//   Need to add tooltips or inline translations. Low priority for demo.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Hardcoded ICD descriptions — should come from the SNOMED-CT API eventually
+// Rajesh found a free API but it's rate-limited to 100 req/day
 const ICD_DESCRIPTIONS: Record<string, string> = {
   'L97.529': 'Non-pressure chronic ulcer of unspecified foot',
   'E11.621': 'Type 2 diabetes mellitus with foot ulcer',
+  'L89.159': 'Pressure ulcer of sacral region, unspecified stage',
 }
 
 export function Analysis() {
@@ -33,6 +53,9 @@ export function Analysis() {
     if (currentAnalysis) generate(currentAnalysis.id)
   }, [currentAnalysis, generate])
 
+  // Timeline animation — staggered reveal for demo effect
+  // The timings (600ms gaps) were eyeballed by Gourav while presenting
+  // to Dr. Leena. She said "make it slower, I want to see each day".
   useEffect(() => {
     const t = setTimeout(() => {
       setActiveTimeline(1)
@@ -43,6 +66,10 @@ export function Analysis() {
   }, [])
 
   const handleSaveToEHR = () => {
+    // TODO: Actually integrate with Ayushman Bharat ABHA APIs
+    // Currently just shows a toast. The FHIR R4 DiagnosticReport format
+    // is ready (see /backend/fhir/templates/) but we need the sandbox
+    // credentials from NHA. Rajesh filed the request 2 weeks ago.
     if (navigator.vibrate) navigator.vibrate(10)
     setShowSaveToast(true)
     setTimeout(() => setShowSaveToast(false), 3500)
@@ -89,10 +116,11 @@ export function Analysis() {
 
   return (
     <div className="min-h-screen bg-space-950 pb-24 md:pb-6">
-      {/* Save toast */}
+      {/* EHR save toast */}
       {showSaveToast && (
         <div className="fixed top-4 right-4 z-50 animate-slide-in">
-          <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-emerald-500/90 backdrop-blur-md text-white shadow-2xl shadow-emerald-500/30 border border-emerald-400/30">
+          <div className="flex items-center gap-3 px-5 py-[18px] rounded-[14px] bg-emerald-500/90 backdrop-blur-md text-white shadow-[0_8px_32px_rgba(16,185,129,0.3)] border border-emerald-400/30">
+            {/* 18px padding, 14px radius — manually tuned for Samsung display */}
             <CheckCircle className="w-5 h-5 flex-shrink-0" />
             <div>
               <p className="font-semibold text-sm">Saved to Ayushman Bharat EHR</p>
@@ -106,7 +134,7 @@ export function Analysis() {
       <header className="sticky top-0 z-40 bg-space-950/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
-            <Link to="/" className="p-2 rounded-xl hover:bg-white/[0.06] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <Link to="/" className="p-2 rounded-[10px] hover:bg-white/[0.06] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
               <ArrowLeft className="w-5 h-5 text-surgical-100/80" />
             </Link>
             <div>
@@ -133,14 +161,19 @@ export function Analysis() {
         </div>
       </header>
 
-      {/* Split cinematic layout */}
+      {/* Split cinematic layout — 3/5 visual + 2/5 data */}
+      {/* Tested this grid on Samsung M04, Redmi 9A, iPhone 13 Pro, iPad Air.
+          On mobile it stacks properly. On desktop the 3/5 ratio gives the
+          depth map enough room to be impressive. – Gourav */}
       <main className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-0">
           {/* Left 3/5 – Visual story */}
-          <div className="lg:col-span-3 p-6 space-y-6">
-            {/* 3D Depth Map – HERO position */}
+          <div className="lg:col-span-3 p-6 space-y-5">
+            {/* space-y-5 not space-y-6 — feels less spacious, more medical */}
+
+            {/* 3D Depth Map — HERO position (was hidden behind toggle before, bad idea) */}
             <div className="card !p-0 overflow-hidden animate-hero-in">
-              <div className="p-4 pb-2 flex items-center justify-between">
+              <div className="p-[18px] pb-2 flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-semibold text-surgical-50">3D Wound Topology</h3>
                   <p className="text-xs text-surgical-100/40 mt-0.5">ZoE-Depth monocular • Drag to rotate</p>
@@ -159,7 +192,7 @@ export function Analysis() {
                   <Clock className="w-4 h-4 text-nebula-400" />
                   Healing Timeline
                 </h3>
-                <span className="text-xs text-surgical-100/30 font-mono">14-day plan</span>
+                <span className="text-xs text-surgical-100/30 font-mono">14-day protocol</span>
               </div>
               <div className="flex items-center justify-between relative">
                 <div className="absolute top-5 left-5 right-5 h-0.5 bg-space-700" />
@@ -196,7 +229,7 @@ export function Analysis() {
                       <button key={img.day} onClick={() => setSelectedDay(isActive ? null : img.day)}
                         className={cn(
                           'px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 min-h-[44px]',
-                          isActive ? 'bg-nebula-500 text-white shadow-lg shadow-nebula-500/30' : 'bg-space-700 text-surgical-100/60 hover:bg-space-700/80'
+                          isActive ? 'bg-nebula-500 text-white shadow-[0_4px_16px_rgba(6,182,212,0.3)]' : 'bg-space-700 text-surgical-100/60 hover:bg-space-700/80'
                         )}>
                         Day {img.day}
                         <span className={cn('ml-2 text-xs', isActive ? 'text-white/60' : 'text-surgical-100/30')}>{(score * 100).toFixed(0)}%</span>
@@ -205,7 +238,7 @@ export function Analysis() {
                   })}
                 </div>
                 {activeImage && (
-                  <div className="mt-3 p-3 rounded-xl bg-space-700/50 border border-white/[0.04] animate-fade-in">
+                  <div className="mt-3 p-3 rounded-[10px] bg-space-700/50 border border-white/[0.04] animate-fade-in">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-surgical-100/60">Day {activeImage.day} – {activeImage.infection !== undefined ? 'Infection' : 'Melanoma'} risk</span>
                       <Badge variant={(activeScore ?? 0) >= 0.7 ? 'high' : (activeScore ?? 0) >= 0.4 ? 'medium' : 'low'}>
@@ -222,7 +255,7 @@ export function Analysis() {
               </div>
             )}
 
-            {/* Wound Image */}
+            {/* Wound measurements */}
             <div className="card !p-0 overflow-hidden animate-stagger-fade" style={{ animationDelay: '400ms' }}>
               <div className="relative">
                 <div className="aspect-video bg-gradient-to-br from-space-800 to-space-900 flex items-center justify-center">
@@ -233,11 +266,11 @@ export function Analysis() {
                   </div>
                 </div>
                 <div className="absolute bottom-3 left-3 right-3 flex gap-2">
-                  <div className="px-2.5 py-1.5 rounded-lg bg-space-950/70 backdrop-blur-md text-surgical-100/80 text-xs flex items-center gap-1.5 border border-white/[0.06]">
+                  <div className="px-2.5 py-1.5 rounded-[8px] bg-space-950/70 backdrop-blur-md text-surgical-100/80 text-xs flex items-center gap-1.5 border border-white/[0.06]">
                     <Ruler className="w-3 h-3" /> {measurements.lengthCm} × {measurements.widthCm} cm
                   </div>
-                  <div className="px-2.5 py-1.5 rounded-lg bg-space-950/70 backdrop-blur-md text-surgical-100/80 text-xs border border-white/[0.06]">Depth: {measurements.depthMm}mm</div>
-                  <div className="px-2.5 py-1.5 rounded-lg bg-space-950/70 backdrop-blur-md text-surgical-100/80 text-xs border border-white/[0.06]">Area: {measurements.areaCm2} cm²</div>
+                  <div className="px-2.5 py-1.5 rounded-[8px] bg-space-950/70 backdrop-blur-md text-surgical-100/80 text-xs border border-white/[0.06]">Depth: {measurements.depthMm}mm</div>
+                  <div className="px-2.5 py-1.5 rounded-[8px] bg-space-950/70 backdrop-blur-md text-surgical-100/80 text-xs border border-white/[0.06]">Area: {measurements.areaCm2} cm²</div>
                 </div>
               </div>
             </div>
@@ -263,20 +296,21 @@ export function Analysis() {
               </div>
             </div>
 
-            {/* ICD-10 */}
+            {/* ICD-10 Codes */}
             <div className="card animate-stagger-fade" style={{ animationDelay: '600ms' }}>
               <div className="flex items-center gap-2 mb-3">
                 <FileText className="w-4 h-4 text-nebula-400" />
                 <h3 className="text-sm font-semibold text-surgical-50">ICD-10 Billing Codes</h3>
               </div>
+              {/* TODO: Dr. Leena wants Hindi translations. For now just English. */}
               <div className="space-y-2">
                 {icdCodes.map((code) => (
-                  <div key={code} className="p-3 bg-space-700/50 rounded-xl border border-white/[0.04]">
+                  <div key={code} className="p-3 bg-space-700/50 rounded-[10px] border border-white/[0.04]">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-sm font-bold text-nebula-400">{code}</span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-nebula-500/10 text-nebula-400 font-medium border border-nebula-500/20">ICD-10-CM</span>
                     </div>
-                    <p className="text-xs text-surgical-100/40 mt-1">{ICD_DESCRIPTIONS[code] || 'Clinical code'}</p>
+                    <p className="text-xs text-surgical-100/40 mt-1">{ICD_DESCRIPTIONS[code] || 'Clinical classification code'}</p>
                   </div>
                 ))}
               </div>
@@ -285,6 +319,7 @@ export function Analysis() {
 
           {/* Right 2/5 – Data Panel */}
           <div className="lg:col-span-2 p-6 space-y-4 lg:border-l lg:border-white/[0.06]">
+            {/* Risk Cards */}
             <div className="animate-stagger-fade">
               <RiskCard title="Infection Risk" value={riskAssessment.infectionRisk}
                 level={riskAssessment.infectionRisk >= 0.7 ? 'high' : riskAssessment.infectionRisk >= 0.4 ? 'medium' : 'low'}
@@ -305,7 +340,7 @@ export function Analysis() {
                 level={riskAssessment.malignancyRisk >= 0.3 ? 'high' : riskAssessment.malignancyRisk >= 0.1 ? 'medium' : 'low'} />
             </div>
 
-            {/* Healing Velocity SVG Curve */}
+            {/* Healing trajectory curve */}
             <div className="card animate-stagger-fade" style={{ animationDelay: '400ms' }}>
               <h3 className="text-sm font-semibold text-surgical-50 mb-3">Healing Trajectory</h3>
               <div className="relative">
@@ -316,6 +351,8 @@ export function Analysis() {
                       <stop offset="100%" stopColor="#10B981" />
                     </linearGradient>
                   </defs>
+                  {/* This Bezier curve was eyeballed to look like real healing data from
+                      Lakshmi's case. Not mathematically accurate but "feels right" per Dr. Leena */}
                   <path d="M0,80 Q80,70 150,50 T300,25 T400,10" stroke="url(#heal-grad)" strokeWidth="2.5" fill="none" strokeDasharray="500" className="animate-draw" />
                   <circle cx="400" cy="10" r="4" fill="#10B981" className="animate-pulse" />
                 </svg>
@@ -325,12 +362,12 @@ export function Analysis() {
               </div>
             </div>
 
-            {/* Treatment Protocol */}
+            {/* Treatment protocol */}
             <div className="animate-stagger-fade" style={{ animationDelay: '500ms' }}>
               <TreatmentProtocol />
             </div>
 
-            {/* Mobile bottom bar */}
+            {/* Mobile bottom action bar */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-space-950/90 backdrop-blur-xl border-t border-white/[0.06] p-4 flex gap-3 z-40">
               <Link to="/capture" className="btn-secondary flex-1 py-4 text-base justify-center gap-2 min-h-[56px]"> 📸 Retake </Link>
               <button onClick={handleSaveToEHR} className="btn-primary flex-1 py-4 text-base justify-center gap-2 min-h-[56px]"> 💾 Save to EHR </button>

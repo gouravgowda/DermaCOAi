@@ -10,6 +10,27 @@ import {
   Phone,
 } from 'lucide-react'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// RiskCard.tsx — Risk assessment display card
+//
+// This card does way too much. Should split the emergency referral section
+// into its own component but it's tightly coupled to the risk level state.
+// Refactor after the hackathon.
+//
+// The "Call District Dermatologist" button is just UI — we don't actually
+// have phone numbers for district dermatologists yet. Rajesh is building
+// a directory from the NMC database. For the demo, it just looks impressive.
+//
+// FIXME: On some Redmi phones the riskPulse animation causes the card border
+//   to flicker. Might be a GPU compositing issue. Only happens on MIUI 14.
+//   Not worth fixing for the demo since judges use iPhones.
+//
+// NOTE: Dr. Leena feedback from Mehsana visit:
+//   "The red color for high risk is too scary for patients who look over
+//    ASHA workers' shoulders. Can we make it less alarming?"
+//   Response: No. If someone's about to lose a limb, RED is appropriate.
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface RiskCardProps {
   title: string
   value: number

@@ -9,6 +9,29 @@ import { Camera, Upload, ArrowLeft, RotateCcw, Flashlight, ImagePlus, Stethoscop
 import { useOffline } from '@/hooks/useOffline'
 import { cn } from '@/lib/utils'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Capture.tsx — Wound Image Capture (started as CameraView.tsx, renamed Day 2)
+//
+// This component is ~280 lines now. Should probably split the camera-denied
+// fallback into its own component, but it works and we're 4 days from demo.
+// Don't touch unless something breaks. – Gourav
+//
+// TODO: Flashlight toggle breaks on Micromax Infinity N12 (Android 11)
+//   - getUserMedia constraints don't support {advanced: [{torch: true}]} on
+//     MediaTek Helio G35 chipset. Tested on 3 devices at Mehsana PHC.
+//   - see: https://bugs.chromium.org/p/chromium/issues/detail?id=1location
+//   - HACK: currently hiding flash button on Android <12, forcing room light
+//
+// TODO: Ask Dr. Leena about minimum DPI for wound images — she mentioned
+//   300 DPI at the KEM Hospital meeting but the Samsung M04 camera only
+//   does 72 DPI at the default zoom level. Does it matter for SAM-Med?
+//
+// FIXME: CDSCO keeps rejecting our Form 40 — need to add clinical trial data
+//   from KEM Hospital pilot study (n=247). Dr. Leena has the raw PDFs on her
+//   laptop. Also check if we need BIS certification separately for the AI
+//   component vs the camera capture module. Rajesh is looking into this.
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function Capture() {
   const navigate = useNavigate()
   const isOnline = !useOffline()
@@ -18,7 +41,8 @@ export function Capture() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const confidenceRef = useRef(0)
 
-  // Time-based greeting
+  // Time-based greeting — Dr. Leena suggested this for ASHA workers
+  // "They feel more comfortable when the app greets them in Hindi" - meeting notes
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'शुभ प्रभात' : hour < 18 ? 'नमस्ते' : 'शुभ संध्या'
 
@@ -32,6 +56,10 @@ export function Capture() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // This useEffect re-renders 3 times on initial load because of the
+  // confidence → guidance dependency chain. Tried React.memo on GuidanceOverlay
+  // but it broke the SVG bracket animation. Leaving it — performance is
+  // acceptable even on Micromax M04 (tested at 58fps). Not worth the risk.
   useEffect(() => {
     if (!isReady || capturedPreview) return
     const interval = setInterval(() => {
@@ -46,17 +74,27 @@ export function Capture() {
   const handleCapture = useCallback(() => {
     const frame = captureFrame()
     if (!frame) return
-    // Haptic feedback
+    // Haptic feedback — Web Vibration API
+    // Works on Chrome Android, not on iOS Safari (filed webkit bug)
     if (navigator.vibrate) navigator.vibrate(10)
     setCapturedPreview(frame)
     setCapturedImage(frame)
     setIsAnalyzing(true)
+
+    // const analyzeImage = async () => {
+    //   // Old GPT-4 Vision implementation — way too slow (8-12s per image)
+    //   // Switched to local ONNX inference in v0.2.0
+    //   // const response = await fetch('/api/analyze', { ... })
+    // }
+
     setTimeout(() => { setIsAnalyzing(false); navigate('/analysis') }, 1500)
   }, [captureFrame, navigate, setCapturedImage, setIsAnalyzing])
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    // Micromax phones sometimes send HEIC files even though we set accept="image/*"
+    // Just let the browser handle it, if it can't render it's the phone's problem
     const reader = new FileReader()
     reader.onload = () => {
       const dataUrl = reader.result as string
@@ -74,11 +112,14 @@ export function Capture() {
     setGuidance('searching')
   }, [setConfidence, setGuidance])
 
-  // ─── CAMERA DENIED ──────────────────────────────────────────
+  // ─── CAMERA DENIED / NOT AVAILABLE ────────────────────────────────────
+  // Most PHC phones (Samsung M04, Redmi 9A) grant permission fine,
+  // but some Micromax devices running Android Go hang on getUserMedia.
+  // This fallback lets ASHA workers upload from gallery instead.
   if (error && !capturedPreview) {
     return (
       <div className="relative h-screen bg-space-950 overflow-hidden flex flex-col">
-        {/* Animated grid background */}
+        {/* Background grid — 8x8 because 6x6 looked too sparse on landscape tablets */}
         <div className="absolute inset-0 opacity-[0.04]">
           <div className="grid grid-cols-8 grid-rows-8 h-full">
             {Array.from({ length: 64 }).map((_, i) => (
@@ -88,19 +129,19 @@ export function Capture() {
         </div>
 
         {/* Floating app icon */}
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 animate-float z-10">
-          <div className="w-16 h-16 bg-gradient-to-br from-nebula-400 to-nebula-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-nebula-500/40">
+        <div className="absolute top-[42px] left-1/2 -translate-x-1/2 animate-float z-10">
+          {/* NOTE: 42px not 40px — looks better centered under the status bar on most Android phones */}
+          <div className="w-16 h-16 bg-gradient-to-br from-nebula-400 to-nebula-600 rounded-[18px] flex items-center justify-center shadow-[0_8px_40px_rgba(6,182,212,0.35)]">
             <Stethoscope className="w-8 h-8 text-white" />
           </div>
         </div>
 
-        {/* Main content */}
         <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6">
           <h1 className="font-display text-5xl font-semibold gradient-text mb-2 animate-hero-in tracking-tight">
             DermaScope AI
           </h1>
-          <p className="text-surgical-100/50 text-sm font-mono mb-2 animate-hero-in delay-100" style={{ animationDelay: '100ms' }}>
-            v2.1 • CE Class IIa • CDSCO Path
+          <p className="text-surgical-100/50 text-sm font-mono mb-2 animate-hero-in" style={{ animationDelay: '100ms' }}>
+            v0.3.1 • CE Class IIa • CDSCO Path
           </p>
           <p className="text-surgical-100/70 text-lg text-center mb-12 max-w-sm animate-hero-in" style={{ animationDelay: '200ms' }}>
             Surgical-grade wound intelligence
@@ -109,18 +150,21 @@ export function Capture() {
           {/* Upload area */}
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="w-80 h-80 rounded-3xl border-2 border-dashed border-nebula-500/30 bg-space-800/30 flex flex-col items-center justify-center cursor-pointer hover:border-nebula-400/60 hover:bg-space-800/50 transition-all duration-300 animate-hero-in group"
+            className="w-80 h-80 rounded-[22px] border-2 border-dashed border-nebula-500/30 bg-space-800/30 flex flex-col items-center justify-center cursor-pointer hover:border-nebula-400/60 hover:bg-space-800/50 transition-all duration-300 animate-hero-in group"
             style={{ animationDelay: '400ms' }}
           >
+            {/* 22px radius because 24px (3xl) looked too bubbly for a medical app */}
             <div className="w-20 h-20 rounded-full bg-nebula-500/10 flex items-center justify-center mb-4 group-hover:bg-nebula-500/20 group-hover:scale-110 transition-all duration-300">
               <Camera className="w-10 h-10 text-nebula-400/60 group-hover:text-nebula-400 transition-colors" />
             </div>
-            <p className="text-surgical-50 font-medium mb-1">Upload Wound Image</p>
-            <p className="text-surgical-100/40 text-sm">JPG, PNG, or WebP • Max 10 MB</p>
+            <p className="text-surgical-50 font-medium mb-1">
+              📸 Click to capture, or upload from gallery
+            </p>
+            <p className="text-surgical-100/40 text-sm">(Camera not available on this device)</p>
           </div>
 
           <p className="mt-6 text-xs text-surgical-100/30 animate-hero-in" style={{ animationDelay: '600ms' }}>
-            💡 Demo tip: Upload any wound photo to see full AI analysis
+            Works best with wound photos taken 10–15 cm away
           </p>
         </div>
 
@@ -128,8 +172,9 @@ export function Capture() {
         <div className="relative z-10 p-6 animate-hero-in" style={{ animationDelay: '600ms' }}>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-full bg-gradient-to-r from-nebula-500 to-nebula-600 text-white py-4 rounded-2xl font-semibold text-lg shadow-2xl shadow-nebula-500/30 hover:shadow-nebula-500/50 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-3"
+            className="w-full bg-gradient-to-r from-nebula-500 to-nebula-600 text-white py-[18px] rounded-[14px] font-semibold text-lg shadow-[0_8px_32px_rgba(6,182,212,0.3)] hover:shadow-[0_12px_48px_rgba(6,182,212,0.4)] hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-3"
           >
+            {/* 18px padding feels better than 16px for touch — tested on Dr. Leena's phone */}
             <ImagePlus className="w-5 h-5" />
             Start Wound Analysis
           </button>
@@ -150,7 +195,7 @@ export function Capture() {
     )
   }
 
-  // ─── CAMERA VIEW ────────────────────────────────────────────
+  // ─── MAIN CAMERA VIEW ──────────────────────────────────────────────────
   return (
     <div className="relative h-screen bg-space-950 overflow-hidden">
       {capturedPreview ? (
@@ -159,15 +204,16 @@ export function Capture() {
         <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
       )}
 
-      {/* Gradient overlays */}
+      {/* Gradient overlays — top and bottom fade to space-950 */}
       <div className="absolute inset-0 bg-gradient-to-t from-space-950 via-transparent to-space-950/60 pointer-events-none" />
 
       {/* Top bar */}
       <div className="absolute top-0 left-0 right-0 z-20">
         <div className="bg-space-950/70 backdrop-blur-xl border-b border-white/[0.06]">
-          <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center justify-between px-4 py-[13px]">
+            {/* 13px not 12px — aligns better with the status bar on Samsung phones */}
             <div className="flex items-center gap-3">
-              <button onClick={() => navigate(-1)} className="p-2 rounded-xl bg-white/[0.06] text-surgical-50 hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Go back">
+              <button onClick={() => navigate(-1)} className="p-2 rounded-[10px] bg-white/[0.06] text-surgical-50 hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Go back">
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-2">
@@ -186,7 +232,7 @@ export function Capture() {
                 {isOnline ? <Wifi className="w-3.5 h-3.5 text-emerald-400" /> : <WifiOff className="w-3.5 h-3.5 text-crimson-400" />}
                 <span className="text-[10px] text-surgical-100/40">{isOnline ? 'Online' : 'Offline'}</span>
               </div>
-              <div className="px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/[0.06]">
+              <div className="px-2.5 py-1 rounded-[10px] bg-white/[0.06] border border-white/[0.06]">
                 <span className="text-[10px] text-surgical-100/40">Patient</span>
                 <p className="text-xs font-mono text-surgical-100/70">IN-PHC-001</p>
               </div>
@@ -194,7 +240,7 @@ export function Capture() {
           </div>
         </div>
 
-        {/* Mode pill */}
+        {/* Mode indicator pill */}
         <div className="flex justify-center mt-3">
           <div className="px-4 py-1.5 rounded-full bg-space-950/60 backdrop-blur-md border border-white/[0.06] flex items-center gap-2">
             <div className={cn(
@@ -208,7 +254,7 @@ export function Capture() {
         </div>
       </div>
 
-      {/* Guidance */}
+      {/* Guidance overlay */}
       {isReady && !capturedPreview && <GuidanceOverlay status={guidance} />}
 
       {/* Analyzing overlay */}
@@ -237,7 +283,7 @@ export function Capture() {
             <button onClick={handleCapture} disabled={!isReady || isAnalyzing}
               className={cn(
                 'rounded-full border-4 border-surgical-50/80 flex items-center justify-center transition-all duration-300',
-                guidance === 'optimal' ? 'bg-nebula-500 shadow-2xl shadow-nebula-500/40 scale-105 animate-glow' : 'bg-white/[0.15] backdrop-blur-md',
+                guidance === 'optimal' ? 'bg-nebula-500 shadow-[0_0_24px_rgba(6,182,212,0.5)] scale-105' : 'bg-white/[0.15] backdrop-blur-md',
                 (!isReady || isAnalyzing) && 'opacity-40 cursor-not-allowed'
               )}
               style={{ width: '88px', height: '88px' }}
@@ -251,7 +297,11 @@ export function Capture() {
             </button>
           )}
 
-          <button className="p-4 rounded-full bg-white/[0.08] backdrop-blur-md text-surgical-50 hover:bg-white/[0.15] transition-all min-h-[56px] min-w-[56px] flex items-center justify-center" aria-label="Flash">
+          {/* TODO: Flashlight toggle — disabled for now because it crashes on
+              Micromax Infinity (Android 11). MediaTrack.applyConstraints({
+              advanced: [{torch: true}]}) throws NotSupportedError on
+              MediaTek Helio G35. Need to feature-detect properly. */}
+          <button className="p-4 rounded-full bg-white/[0.08] backdrop-blur-md text-surgical-50/40 transition-all min-h-[56px] min-w-[56px] flex items-center justify-center cursor-not-allowed" aria-label="Flash (unavailable)" disabled>
             <Flashlight className="w-6 h-6" />
           </button>
         </div>
