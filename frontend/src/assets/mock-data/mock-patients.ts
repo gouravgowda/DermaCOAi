@@ -114,14 +114,15 @@ export const mockPatients: Patient[] = [
 export const mockAnalysisResult = {
   id: 'analysis-2026-001',
   patientId: 'IN-PHC-2026-001',
+  imageUrl: '/mock/lakshmi-day0.jpg',
   timestamp: '2026-01-15T09:30:00+05:30',
-  woundType: 'diabetic_foot_ulcer',
+  woundType: 'diabetic_ulcer' as const,
   measurements: {
     lengthCm: 3.2,
     widthCm: 2.8,
     depthMm: 4.5,
     areaCm2: 7.04, // Rajesh calculated this manually, double-check the formula
-    perimeter: 11.2,
+    perimeterCm: 11.2,
   },
   riskAssessment: {
     overallRisk: 'medium' as const,
@@ -130,10 +131,10 @@ export const mockAnalysisResult = {
     amputationRisk: 0.15,
     malignancyRisk: 0.02,
     factors: [
-      { name: 'Bacterial biofilm', severity: 'medium' as const, description: 'Colonized wound bed detected via texture analysis' },
-      { name: 'Diabetic neuropathy', severity: 'high' as const, description: 'HbA1c > 8.0, reduced sensation in affected limb' },
-      { name: 'Delayed healing', severity: 'medium' as const, description: 'Wound age > 14 days with <20% area reduction' },
-      { name: 'Infection indicator', severity: 'medium' as const, description: 'Erythema extending >2cm from wound margins' },
+      { name: 'Bacterial biofilm', severity: 'medium' as const, description: 'Colonized wound bed detected via texture analysis', recommendation: 'Consider topical antimicrobial dressing' },
+      { name: 'Diabetic neuropathy', severity: 'high' as const, description: 'HbA1c > 8.0, reduced sensation in affected limb', recommendation: 'Optimize glycemic control, protective footwear' },
+      { name: 'Delayed healing', severity: 'medium' as const, description: 'Wound age > 14 days with <20% area reduction', recommendation: 'Consider advanced wound therapy' },
+      { name: 'Infection indicator', severity: 'medium' as const, description: 'Erythema extending >2cm from wound margins', recommendation: 'Oral antibiotics, monitor for cellulitis' },
     ],
   },
   tissueComposition: {
@@ -141,7 +142,10 @@ export const mockAnalysisResult = {
     slough: 30,
     necrotic: 10,
     epithelial: 15,
+    hypergranulation: 0,
   },
+  depthData: null, // SAM-Med depth estimation not available for this scan
+  segmentationMask: null, // Mask generated at inference time, not persisted yet
 }
 
 // ──────────────────────────────────────────────
