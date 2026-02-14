@@ -8,7 +8,7 @@ interface SpinnerProps {
 export function Spinner({ size = 'md', className }: SpinnerProps) {
   const sizeClasses = {
     sm: 'h-4 w-4 border-2',
-    md: 'h-8 w-8 border-3',
+    md: 'h-8 w-8 border-[3px]',
     lg: 'h-12 w-12 border-4',
   }
 
@@ -17,7 +17,7 @@ export function Spinner({ size = 'md', className }: SpinnerProps) {
       role="status"
       aria-label="Loading"
       className={cn(
-        'animate-spin rounded-full border-medical-teal/30 border-t-medical-teal',
+        'animate-spin rounded-full border-nebula-500/20 border-t-nebula-400',
         sizeClasses[size],
         className
       )}

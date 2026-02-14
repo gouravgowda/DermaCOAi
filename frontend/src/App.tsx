@@ -13,10 +13,10 @@ const PatientDetail = lazy(() => import('@/pages/PatientDetail').then(m => ({ de
 
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center h-screen bg-bg-primary">
-      <div className="text-center">
-        <Spinner size="lg" className="mx-auto mb-3" />
-        <p className="text-sm text-gray-500">Loading module...</p>
+    <div className="flex items-center justify-center h-screen bg-space-950">
+      <div className="text-center animate-hero-in">
+        <Spinner size="lg" className="mx-auto mb-4" />
+        <p className="text-sm text-surgical-100/50">Loading module...</p>
       </div>
     </div>
   )
@@ -28,9 +28,9 @@ function Layout() {
       <Navbar />
       <Outlet />
       {/* Trust footer */}
-      <footer className="hidden md:block bg-gradient-to-r from-medical-blue to-medical-blue/95 text-white py-3 text-center">
-        <p className="text-xs font-medium tracking-wide">
-          Built for <span className="text-medical-teal">Ayushman Bharat</span> • CDSCO Compliant Path • DPDP Act 2023 • ₹0 Hardware Cost
+      <footer className="hidden md:block bg-space-800/50 border-t border-white/[0.06] py-4 text-center">
+        <p className="text-xs font-medium text-surgical-100/30 tracking-wide">
+          Built for <span className="text-nebula-400">Ayushman Bharat</span> • CDSCO Compliant Path • DPDP Act 2023 • ₹0 Hardware Cost
         </p>
       </footer>
       <BottomNav />
@@ -41,13 +41,10 @@ function Layout() {
 export default function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-bg-primary font-sans text-text-primary antialiased">
+      <div className="min-h-screen bg-space-950 font-sans text-surgical-50 antialiased">
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            {/* Capture page is fullscreen – no Navbar/BottomNav */}
             <Route path="/capture" element={<Capture />} />
-
-            {/* All other pages share the layout */}
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/analysis" element={<Analysis />} />

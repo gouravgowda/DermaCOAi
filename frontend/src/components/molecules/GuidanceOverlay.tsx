@@ -1,96 +1,60 @@
 import { cn } from '@/lib/utils'
 
 interface GuidanceOverlayProps {
-  status: 'searching' | 'adjusting' | 'optimal'
+  status: 'searching' | 'adjusting' | 'optimal' | null
   className?: string
 }
 
-/**
- * GuidanceOverlay – animated SVG brackets + prominent center messaging
- * Makes guidance impossible to miss, even for first-time ASHA workers
- */
 export function GuidanceOverlay({ status, className }: GuidanceOverlayProps) {
+  if (!status) return null
+
   const config = {
-    searching: {
-      stroke: '#EF4444',
-      text: 'Center the wound area',
-      subtext: 'Move device over the wound',
-      bg: 'bg-risk-high/30',
-    },
-    adjusting: {
-      stroke: '#F59E0B',
-      text: 'Hold steady...',
-      subtext: 'Optimal distance: 10-15 cm',
-      bg: 'bg-risk-medium/30',
-    },
-    optimal: {
-      stroke: '#10B981',
-      text: '✓ Perfect! Tap to capture',
-      subtext: 'Image quality sufficient for analysis',
-      bg: 'bg-risk-low/30',
-    },
+    searching: { text: 'Center the wound area', subtext: 'Optimal distance: 10–15 cm', bg: 'bg-space-800/80', ring: 'border-nebula-500/30' },
+    adjusting: { text: 'Hold steady...', subtext: 'Almost there — keep distance', bg: 'bg-amber-500/10', ring: 'border-amber-400/40' },
+    optimal: { text: '✓ Perfect', subtext: 'Tap capture now', bg: 'bg-emerald-500/10', ring: 'border-emerald-400/40' },
   }
 
-  const { stroke, text, subtext, bg } = config[status]
-
-  const breatheStyle: React.CSSProperties =
-    status !== 'optimal'
-      ? {
-          animation: 'bracket-breathe 3s ease-in-out infinite',
-          transition: 'stroke 0.6s ease, opacity 0.6s ease',
-        }
-      : { transition: 'stroke 0.6s ease, opacity 0.6s ease' }
+  const { text, subtext, bg, ring } = config[status]
 
   return (
     <div className={cn('absolute inset-0 pointer-events-none z-10', className)}>
-      <style>{`
-        @keyframes bracket-breathe {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.55; }
-        }
-      `}</style>
-
-      {/* Corner brackets */}
+      {/* Animated corner brackets */}
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 400" fill="none">
-        <path d="M80 140 L80 80 L140 80" stroke={stroke} strokeWidth="3" strokeLinecap="round" style={breatheStyle} />
-        <path d="M260 80 L320 80 L320 140" stroke={stroke} strokeWidth="3" strokeLinecap="round" style={breatheStyle} />
-        <path d="M80 260 L80 320 L140 320" stroke={stroke} strokeWidth="3" strokeLinecap="round" style={breatheStyle} />
-        <path d="M260 320 L320 320 L320 260" stroke={stroke} strokeWidth="3" strokeLinecap="round" style={breatheStyle} />
-
-        {status === 'optimal' && (
-          <g style={{ animation: 'bracket-breathe 2s ease-in-out 1' }}>
-            <circle cx="200" cy="200" r="4" fill="#10B981" opacity="0.8" />
-            <circle cx="200" cy="200" r="16" stroke="#10B981" strokeWidth="1.5" fill="none" opacity="0.5" />
-          </g>
-        )}
+        <g className={cn(status === 'optimal' ? 'stroke-emerald-400' : 'stroke-nebula-400/50')}>
+          <path d="M80,20 L20,20 L20,80" strokeWidth="2" strokeLinecap="round" className="animate-pulse" />
+          <path d="M320,20 L380,20 L380,80" strokeWidth="2" strokeLinecap="round" className="animate-pulse" style={{ animationDelay: '150ms' }} />
+          <path d="M80,380 L20,380 L20,320" strokeWidth="2" strokeLinecap="round" className="animate-pulse" style={{ animationDelay: '300ms' }} />
+          <path d="M320,380 L380,380 L380,320" strokeWidth="2" strokeLinecap="round" className="animate-pulse" style={{ animationDelay: '450ms' }} />
+        </g>
       </svg>
 
-      {/* Center guidance message – large and impossible to miss */}
+      {/* Center guidance pill */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className={cn(
-          'px-6 py-4 rounded-2xl backdrop-blur-md text-center transition-all duration-500 max-w-[280px]',
-          bg
+          'px-6 py-4 rounded-2xl backdrop-blur-xl text-center transition-all duration-500 max-w-[280px] border',
+          bg, ring
         )}>
           <p className={cn(
-            'text-lg font-bold text-white',
+            'text-lg font-bold text-surgical-50',
             status === 'searching' && 'animate-pulse'
           )}>
             {text}
           </p>
-          <p className="text-xs text-white/70 mt-1">{subtext}</p>
+          <p className="text-xs text-surgical-100/50 mt-1">{subtext}</p>
         </div>
       </div>
 
-      {/* Distance indicator at bottom */}
+      {/* Bottom quality indicator */}
       <div className="absolute bottom-32 left-0 right-0 flex justify-center">
-        <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-black/40 backdrop-blur-sm">
-          <div className={cn(
-            'w-2 h-2 rounded-full',
-            status === 'optimal' ? 'bg-risk-low' : status === 'adjusting' ? 'bg-risk-medium' : 'bg-risk-high'
-          )} />
-          <span className="text-[11px] font-medium text-white/80">
-            {status === 'optimal' ? 'Quality: Excellent' : status === 'adjusting' ? 'Quality: Good' : 'Quality: Low'}
-          </span>
+        <div className={cn(
+          'px-4 py-2 rounded-full backdrop-blur-md text-[11px] font-medium border',
+          status === 'optimal'
+            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+            : status === 'adjusting'
+            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+            : 'bg-space-800/60 text-surgical-100/50 border-white/[0.06]'
+        )}>
+          Quality: {status === 'optimal' ? '● Excellent' : status === 'adjusting' ? '◐ Adjusting' : '○ Searching'}
         </div>
       </div>
     </div>

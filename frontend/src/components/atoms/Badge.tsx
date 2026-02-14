@@ -10,12 +10,12 @@ interface BadgeProps {
 
 export function Badge({ variant, children, className, pulse }: BadgeProps) {
   const variantClasses: Record<string, string> = {
-    low: 'bg-risk-low/10 text-risk-low border-risk-low/30',
-    medium: 'bg-risk-medium/10 text-risk-medium border-risk-medium/30',
-    high: 'bg-risk-high/10 text-risk-high border-risk-high/30',
-    critical: 'bg-risk-high/20 text-risk-high border-risk-high/50',
-    info: 'bg-medical-teal/10 text-medical-teal border-medical-teal/30',
-    default: 'bg-gray-100 text-gray-600 border-gray-200',
+    low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    high: 'bg-crimson-500/10 text-crimson-400 border-crimson-500/20',
+    critical: 'bg-crimson-500/20 text-crimson-400 border-crimson-500/30',
+    info: 'bg-nebula-500/10 text-nebula-400 border-nebula-500/20',
+    default: 'bg-space-700 text-surgical-100/60 border-white/[0.06]',
   }
 
   return (
