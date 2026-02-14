@@ -1,4 +1,4 @@
-import { useRef, useMemo, Suspense } from 'react'
+import { useRef, useMemo, useEffect, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
@@ -10,32 +10,22 @@ interface DepthMapProps {
 
 /**
  * DepthMesh – procedural depth-mapped plane that visualizes wound topology
- * In production: driven by ZoE-Depth ONNX inference
- * In demo mode: generates realistic mock depth data
+ * Reduced to 32×32 segments to prevent memory issues on mobile
  */
 function DepthMesh() {
   const meshRef = useRef<THREE.Mesh>(null)
 
-  // Generate mock depth data that looks like a wound crater
-  const { geometry, colorArray } = useMemo(() => {
-    const segments = 64
+  const geometry = useMemo(() => {
+    const segments = 32 // Reduced from 64 to prevent crashes
     const geo = new THREE.PlaneGeometry(5, 5, segments, segments)
     const positions = geo.attributes.position
     const colors = new Float32Array(positions.count * 3)
-
-    const centerX = 0
-    const centerY = 0
 
     for (let i = 0; i < positions.count; i++) {
       const x = positions.getX(i)
       const y = positions.getY(i)
 
-      // Create a wound-like depression in the center
-      const distFromCenter = Math.sqrt(
-        Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
-      )
-
-      // Wound crater shape with irregular edges
+      const distFromCenter = Math.sqrt(x * x + y * y)
       const woundRadius = 1.2
       const noise = Math.sin(distFromCenter * 3 + x * 2) * 0.15
       const depth =
@@ -45,25 +35,38 @@ function DepthMesh() {
 
       positions.setZ(i, depth + (Math.random() - 0.5) * 0.02)
 
-      // Color by depth: red=deep, yellow=moderate, green=surface
       const normalizedDepth = Math.abs(depth) / 0.5
-      colors[i * 3] = normalizedDepth > 0.5 ? 1 : normalizedDepth * 2 // R
-      colors[i * 3 + 1] = normalizedDepth < 0.5 ? 0.8 : 1 - normalizedDepth // G
-      colors[i * 3 + 2] = 0.3 * (1 - normalizedDepth) // B
+      colors[i * 3] = normalizedDepth > 0.5 ? 1 : normalizedDepth * 2
+      colors[i * 3 + 1] = normalizedDepth < 0.5 ? 0.8 : 1 - normalizedDepth
+      colors[i * 3 + 2] = 0.3 * (1 - normalizedDepth)
     }
 
     geo.computeVertexNormals()
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-
-    return { geometry: geo, colorArray: colors }
+    return geo
   }, [])
 
-  // Gentle auto-rotation for visual interest
+  // Gentle auto-rotation
   useFrame((state) => {
     if (meshRef.current) {
       meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.3) * 0.05
     }
   })
+
+  // Cleanup on unmount to prevent memory leak
+  useEffect(() => {
+    return () => {
+      if (meshRef.current) {
+        meshRef.current.geometry.dispose()
+        const mat = meshRef.current.material
+        if (Array.isArray(mat)) {
+          mat.forEach((m) => m.dispose())
+        } else {
+          mat.dispose()
+        }
+      }
+    }
+  }, [])
 
   return (
     <mesh ref={meshRef} geometry={geometry} rotation={[-0.6, 0, 0]}>
@@ -91,6 +94,10 @@ export function DepthMap({ className }: DepthMapProps) {
         <Canvas
           camera={{ position: [0, 3, 4], fov: 45 }}
           gl={{ antialias: true, alpha: true }}
+          frameloop="demand" // Only render on interaction, saves GPU
+          onCreated={({ gl }) => {
+            gl.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+          }}
         >
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 5, 5]} intensity={1} />

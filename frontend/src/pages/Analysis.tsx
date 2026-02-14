@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAnalysisStore, useProtocolStore } from '@/lib/stores'
-import { mockAnalysisResult } from '@/assets/mock-data/mock-patients'
+import { mockAnalysisResult, mockPatients } from '@/assets/mock-data/mock-patients'
 import { RiskCard } from '@/components/molecules/RiskCard'
 import { Badge } from '@/components/atoms/Badge'
 import { Spinner } from '@/components/atoms/Spinner'
@@ -16,11 +16,13 @@ import {
   Target,
   Clock,
   AlertTriangle,
+  Camera,
 } from 'lucide-react'
 
 export function Analysis() {
   const { currentAnalysis, isAnalyzing, setAnalysis } = useAnalysisStore()
   const { generate } = useProtocolStore()
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
 
   // Load mock data if no analysis exists
   useEffect(() => {
@@ -63,6 +65,16 @@ export function Analysis() {
   }
 
   const { measurements, riskAssessment, tissueComposition, woundType } = currentAnalysis
+
+  // Get the patient's images for before/after
+  const patient = mockPatients.find((p) => p.id === currentAnalysis.patientId)
+  const patientImages = patient?.images ?? []
+  const activeImage = selectedDay !== null
+    ? patientImages.find((img) => img.day === selectedDay)
+    : null
+  const activeScore = activeImage
+    ? (activeImage.infection ?? activeImage.melanomaRisk ?? 0)
+    : null
 
   return (
     <div className="min-h-screen bg-bg-primary pb-24 md:pb-6">
@@ -107,13 +119,71 @@ export function Analysis() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2/3 – Image & Depth */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Before/After Day Toggle */}
+            {patientImages.length > 1 && (
+              <div className="card !p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Camera className="w-4 h-4 text-medical-teal" />
+                  <h3 className="text-sm font-semibold text-text-primary">Healing Progress</h3>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {patientImages.map((img) => {
+                    const score = img.infection ?? img.melanomaRisk ?? 0
+                    const isActive = selectedDay === img.day
+                    return (
+                      <button
+                        key={img.day}
+                        onClick={() => setSelectedDay(isActive ? null : img.day)}
+                        className={cn(
+                          'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]',
+                          isActive
+                            ? 'bg-medical-teal text-white shadow-md shadow-medical-teal/20'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        )}
+                      >
+                        Day {img.day}
+                        <span className={cn(
+                          'ml-2 text-xs',
+                          isActive ? 'text-white/70' : 'text-gray-400'
+                        )}>
+                          {(score * 100).toFixed(0)}%
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+                {/* Score comparison */}
+                {activeImage && (
+                  <div className="mt-3 p-3 rounded-lg bg-gray-50 animate-fade-in">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">
+                        Day {activeImage.day} — {activeImage.infection !== undefined ? 'Infection' : 'Melanoma'} risk
+                      </span>
+                      <Badge variant={
+                        (activeScore ?? 0) >= 0.7 ? 'high' : (activeScore ?? 0) >= 0.4 ? 'medium' : 'low'
+                      }>
+                        {((activeScore ?? 0) * 100).toFixed(0)}%
+                      </Badge>
+                    </div>
+                    {selectedDay !== null && selectedDay > 0 && (
+                      <p className="text-xs text-risk-low mt-1 font-medium">
+                        ↓ {((patientImages[0].infection ?? 0) - (activeScore ?? 0)).toFixed(2) } improvement since Day 0
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Wound image with annotations */}
             <div className="card !p-0 overflow-hidden">
               <div className="relative">
                 <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center">
                   <div className="text-center">
                     <Target className="w-10 h-10 text-medical-teal/30 mx-auto mb-2" />
-                    <p className="text-sm text-gray-400">Wound Image</p>
+                    <p className="text-sm text-gray-400">
+                      {selectedDay !== null ? `Day ${selectedDay} Capture` : 'Wound Image'}
+                    </p>
                     <p className="text-xs text-gray-300 mt-1">
                       {woundType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                     </p>

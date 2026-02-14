@@ -5,7 +5,7 @@ import { useCaptureStore } from '@/lib/stores'
 import { GuidanceOverlay } from '@/components/molecules/GuidanceOverlay'
 import { ConfidenceBar } from '@/components/atoms/ConfidenceBar'
 import { Spinner } from '@/components/atoms/Spinner'
-import { Camera, Upload, ArrowLeft, RotateCcw, Flashlight } from 'lucide-react'
+import { Camera, Upload, ArrowLeft, RotateCcw, Flashlight, ImagePlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function Capture() {
@@ -16,7 +16,6 @@ export function Capture() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const confidenceRef = useRef(0)
 
-  // Keep ref in sync (no re-render triggered)
   useEffect(() => {
     confidenceRef.current = confidence
   }, [confidence])
@@ -30,7 +29,7 @@ export function Capture() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Simulate frame analysis – stable deps, never re-created
+  // Simulate frame analysis – only when camera is active
   useEffect(() => {
     if (!isReady || capturedPreview) return
 
@@ -38,7 +37,6 @@ export function Capture() {
       const current = confidenceRef.current
       const next = Math.min(current + Math.random() * 10 + 2, 100)
       setConfidence(next)
-
       const newStatus = next > 80 ? 'optimal' : next > 45 ? 'adjusting' : 'searching'
       setGuidance(newStatus)
     }, 1200)
@@ -54,7 +52,6 @@ export function Capture() {
     setCapturedImage(frame)
     setIsAnalyzing(true)
 
-    // Simulate 1.5s analysis then navigate to results
     setTimeout(() => {
       setIsAnalyzing(false)
       navigate('/analysis')
@@ -89,6 +86,71 @@ export function Capture() {
     setGuidance('searching')
   }, [setConfidence, setGuidance])
 
+  // ─── CAMERA DENIED / ERROR STATE ────────────────────────────
+  // Big, friendly upload fallback so demo never stops dead
+  if (error && !capturedPreview) {
+    return (
+      <div className="relative h-screen bg-gradient-to-br from-gray-900 via-medical-blue to-gray-900 flex flex-col items-center justify-center p-6">
+        {/* Back button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+
+        <div className="text-center max-w-sm">
+          <div className="w-20 h-20 rounded-full bg-medical-teal/20 flex items-center justify-center mx-auto mb-6">
+            <Camera className="w-10 h-10 text-medical-teal/60" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Camera Not Available</h2>
+          <p className="text-sm text-white/60 mb-8">{error}</p>
+
+          {/* Big Upload Button */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-medical-teal to-medical-teal/80 text-white font-semibold text-lg flex items-center justify-center gap-3 shadow-lg shadow-medical-teal/20 hover:shadow-xl hover:shadow-medical-teal/30 transition-all active:scale-95"
+          >
+            <ImagePlus className="w-6 h-6" />
+            Upload Wound Image
+          </button>
+
+          <p className="mt-4 text-xs text-white/40">
+            JPG, PNG, or WebP • Max 10 MB
+          </p>
+
+          {/* Demo hint */}
+          <div className="mt-8 p-3 rounded-xl bg-white/5 border border-white/10">
+            <p className="text-xs text-white/50">
+              💡 <span className="text-medical-teal">Demo tip:</span> Upload any wound photo to see DermaScope AI analysis in action
+            </p>
+          </div>
+        </div>
+
+        {/* Analyzing overlay */}
+        {isAnalyzing && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-30">
+            <div className="text-center">
+              <Spinner size="lg" className="mx-auto mb-4" />
+              <p className="text-white font-medium">Analyzing wound...</p>
+              <p className="text-white/50 text-sm mt-1">AI segmentation in progress</p>
+            </div>
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
+      </div>
+    )
+  }
+
+  // ─── NORMAL CAMERA VIEW ─────────────────────────────────────
   return (
     <div className="relative h-screen bg-black overflow-hidden">
       {/* Camera feed or captured preview */}
@@ -108,7 +170,7 @@ export function Capture() {
         />
       )}
 
-      {/* Gradient overlays for readability */}
+      {/* Gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
 
       {/* Top bar */}
@@ -135,25 +197,8 @@ export function Capture() {
         </button>
       </div>
 
-      {/* Guidance overlay – only when camera is active */}
+      {/* Guidance overlay */}
       {isReady && !capturedPreview && <GuidanceOverlay status={guidance} />}
-
-      {/* Camera error – fallback to upload */}
-      {error && !capturedPreview && (
-        <div className="absolute inset-0 flex items-center justify-center bg-medical-blue/90 z-10">
-          <div className="text-center p-6 max-w-sm">
-            <Camera className="w-12 h-12 text-white/40 mx-auto mb-4" />
-            <p className="text-white text-sm mb-2">{error}</p>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="btn-primary gap-2 mt-4"
-            >
-              <Upload className="w-4 h-4" />
-              Upload Image
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Analyzing overlay */}
       {isAnalyzing && (
@@ -168,7 +213,6 @@ export function Capture() {
 
       {/* Bottom controls */}
       <div className="absolute bottom-0 left-0 right-0 p-6 z-20 space-y-4">
-        {/* Confidence bar */}
         {isReady && !capturedPreview && !isAnalyzing && (
           <ConfidenceBar confidence={confidence} className="mb-2" />
         )}
