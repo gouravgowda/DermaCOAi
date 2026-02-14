@@ -15,7 +15,7 @@ interface MetricCardProps {
  */
 function useCountUp(target: number, duration = 1200) {
   const [current, setCurrent] = useState(0)
-  const frameRef = useRef<number>()
+  const frameRef = useRef<number>(0)
 
   useEffect(() => {
     const startTime = performance.now()
