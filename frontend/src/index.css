@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* ── Custom Theme ── */
+@theme {
+  --color-medical-blue-50: #E6F0F7;
+  --color-medical-blue-100: #C2D9EB;
+  --color-medical-blue-200: #8DB3D7;
+  --color-medical-blue-300: #5A8DC3;
+  --color-medical-blue-400: #3270AF;
+  --color-medical-blue-500: #0A2540;
+  --color-medical-blue: #0A2540;
+
+  --color-medical-teal-50: #E6FBFC;
+  --color-medical-teal-100: #B3F3F5;
+  --color-medical-teal-200: #80EBEE;
+  --color-medical-teal-300: #4DE3E7;
+  --color-medical-teal-400: #1ADBE0;
+  --color-medical-teal-500: #00C6CF;
+  --color-medical-teal: #00C6CF;
+
+  --color-medical-red-50: #FFE6E6;
+  --color-medical-red: #FF6B6B;
+
+  --color-medical-green-50: #E6F9F7;
+  --color-medical-green: #4ECDC4;
+
+  --color-risk-low: #10B981;
+  --color-risk-medium: #F59E0B;
+  --color-risk-high: #EF4444;
+
+  --color-bg-primary: #F8FAFB;
+  --color-text-primary: #1A2B3C;
+  --color-border-focus: #00C6CF;
+
+  --font-sans: 'Inter', system-ui, 'Noto Sans Devanagari', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --animate-glow: glow 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s infinite linear;
+  --animate-pulse-teal: pulse-teal 2s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.5s ease-out forwards;
+  --animate-slide-up: slide-up 0.6s ease-out forwards;
+
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 4px rgba(0, 198, 207, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(0, 198, 207, 0.8); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  @keyframes pulse-teal {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ── Base resets ── */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  button,
+  a,
+  [role='button'] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-border-focus);
+  }
+}
+
+/* ── Component Classes ── */
+@layer components {
+  .btn-primary {
+    @apply bg-medical-teal text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:brightness-110 active:scale-95 inline-flex items-center justify-center;
+    min-height: 48px;
+    min-width: 48px;
+  }
+  .btn-secondary {
+    @apply bg-white text-medical-blue border border-medical-teal/30 px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-medical-teal/5 active:scale-95 inline-flex items-center justify-center;
+    min-height: 48px;
+    min-width: 48px;
+  }
+  .btn-danger {
+    @apply bg-medical-red text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:brightness-110 active:scale-95 inline-flex items-center justify-center;
+    min-height: 48px;
+    min-width: 48px;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+  }
+  .card-glass {
+    @apply backdrop-blur-sm bg-white/80 border border-medical-teal/20 rounded-xl p-6 shadow-lg;
+  }
+  .input-clinical {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition-all duration-200;
+  }
+  .input-clinical:focus {
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 2px var(--color-border-focus);
+  }
+}
+
+/* ── Utility Classes ── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Selection color ── */
+::selection {
+  background: rgba(0, 198, 207, 0.2);
+  color: #0a2540;
+}

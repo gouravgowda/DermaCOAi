@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build output
+frontend/dist/
+frontend/.vite/
+backend/*.egg-info/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ML models (too large for git)
+ml-models/*.onnx
+ml-models/*.bin
+ml-models/*.pt
+
+# Logs
+*.log
+npm-debug.log*
+
+# Misc
+*.tsbuildinfo
+.gemini/

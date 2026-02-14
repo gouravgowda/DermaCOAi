@@ -1,0 +1,20 @@
+{
+  "name": "DermaScope AI",
+  "short_name": "DermaScope",
+  "description": "AI-powered wound intelligence for India's Primary Health Centres",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFB",
+  "theme_color": "#0A2540",
+  "orientation": "portrait-primary",
+  "categories": ["medical", "health"],
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
