@@ -14,6 +14,16 @@ import {
   Zap,
 } from 'lucide-react'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Research.tsx — Federated Learning Dashboard
+//
+// Shows how the model learns from distributed PHC data without moving patient
+// records. Key for DPDP Act compliance.
+//
+// The map visualization uses a simplified SVG of India.
+// Coordinates in mock-patients.ts are roughly accurate for Gujarat districts.
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function Research() {
   const mockPhcs = useMemo(() => generateMockPhcs(), [])
   const [modelVersion, setModelVersion] = useState(3.42)
@@ -21,6 +31,11 @@ export function Research() {
   const [totalPatients, setTotalPatients] = useState(12000)
   const [lastContribution, setLastContribution] = useState('')
   const [activePulse, setActivePulse] = useState<number | null>(null)
+  const [nextAggregationTime, setNextAggregationTime] = useState(0)
+
+  useEffect(() => {
+    setNextAggregationTime(Math.floor(Math.random() * 30 + 10))
+  }, [])
 
   // Simulate federated learning rounds
   useEffect(() => {
@@ -48,13 +63,13 @@ export function Research() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 rounded-full bg-medical-teal animate-pulse" />
-          <span className="text-xs text-medical-teal font-medium tracking-wider uppercase">
+          <div className="w-2 h-2 rounded-full bg-accent-teal-500 animate-pulse" />
+          <span className="text-xs text-accent-teal-500 font-medium tracking-wider uppercase">
             Federated Learning Network
           </span>
         </div>
-        <h2 className="text-2xl font-bold text-text-primary">Research Dashboard</h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <h2 className="text-2xl font-bold text-neutral-800">Research Dashboard</h2>
+        <p className="text-sm text-neutral-500 mt-1">
           Privacy-preserving model training across India's PHC network. No raw data leaves the device.
         </p>
       </div>
@@ -91,20 +106,20 @@ export function Research() {
         <div className="lg:col-span-2 card !p-0 overflow-hidden">
           <div className="p-4 pb-2 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-                <Globe2 className="w-4 h-4 text-medical-teal" />
+              <h3 className="text-sm font-semibold text-neutral-800 flex items-center gap-2">
+                <Globe2 className="w-4 h-4 text-accent-teal-500" />
                 PHC Network Map
               </h3>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-neutral-400 mt-0.5">
                 {mockPhcs.length} Primary Health Centres across 9 states
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-medical-teal" />
+              <span className="flex items-center gap-1 text-neutral-600">
+                <div className="w-2 h-2 rounded-full bg-accent-teal-500" />
                 Active ({activeNodes})
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 text-neutral-600">
                 <div className="w-2 h-2 rounded-full bg-risk-medium animate-pulse" />
                 Syncing ({syncingNodes})
               </span>
@@ -112,7 +127,7 @@ export function Research() {
           </div>
 
           {/* SVG Map of India with dots */}
-          <div className="relative bg-medical-blue/5 p-4" style={{ minHeight: '400px' }}>
+          <div className="relative bg-medical-blue-50/50 p-4" style={{ minHeight: '400px' }}>
             <svg
               viewBox="65 5 40 40"
               className="w-full h-full"
@@ -122,7 +137,7 @@ export function Research() {
               <path
                 d="M75,8 L82,8 L88,10 L92,14 L94,18 L95,22 L93,26 L90,28 L88,32 L85,35 L82,38 L78,40 L76,37 L72,34 L70,30 L68,26 L67,22 L68,18 L70,14 L72,10 Z"
                 fill="none"
-                stroke="#00C6CF"
+                stroke="#00B6C7"
                 strokeWidth="0.15"
                 opacity="0.3"
               />
@@ -138,10 +153,10 @@ export function Research() {
                       r={isActive ? 0.4 : 0.15}
                       fill={
                         phc.status === 'active'
-                          ? '#00C6CF'
+                          ? '#00B6C7'
                           : phc.status === 'syncing'
                           ? '#F59E0B'
-                          : '#6B7280'
+                          : '#9CA3AF'
                       }
                       opacity={phc.status === 'offline' ? 0.3 : 0.8}
                       className={cn(isActive && 'animate-pulse-teal')}
@@ -162,7 +177,7 @@ export function Research() {
                         cy={(phc.lat - 5) * -1 + 35}
                         r="0.8"
                         fill="none"
-                        stroke="#00C6CF"
+                        stroke="#00B6C7"
                         strokeWidth="0.05"
                         opacity="0.5"
                       >
@@ -192,12 +207,12 @@ export function Research() {
         {/* Activity Feed */}
         <div className="space-y-4">
           {/* Privacy card */}
-          <div className="card-glass border-medical-teal/20">
+          <div className="card-glass border-accent-teal-500/20">
             <div className="flex items-center gap-2 mb-2">
-              <Lock className="w-4 h-4 text-medical-teal" />
-              <h3 className="text-sm font-semibold text-text-primary">Privacy Guarantee</h3>
+              <Lock className="w-4 h-4 text-accent-teal-500" />
+              <h3 className="text-sm font-semibold text-neutral-800">Privacy Guarantee</h3>
             </div>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <p className="text-xs text-neutral-500 leading-relaxed">
               Only model gradients are shared – never raw patient images or data.
               Compliant with DPDP Act 2023 and ICMR guidelines.
             </p>
@@ -210,45 +225,45 @@ export function Research() {
 
           {/* Latest contribution */}
           <div className="card">
-            <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-medical-teal" />
+            <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-accent-teal-500" />
               Latest Activity
             </h3>
             {lastContribution && (
-              <div className="p-3 rounded-lg bg-medical-teal/5 border border-medical-teal/10 animate-fade-in">
-                <p className="text-xs text-gray-600">{lastContribution}</p>
-                <p className="text-[10px] text-gray-400 mt-1">Just now</p>
+              <div className="p-3 rounded-lg bg-accent-teal-50 border border-accent-teal-100 animate-fade-in">
+                <p className="text-xs text-neutral-600">{lastContribution}</p>
+                <p className="text-[10px] text-neutral-400 mt-1">Just now</p>
               </div>
             )}
           </div>
 
           {/* Training stats */}
           <div className="card">
-            <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-medical-teal" />
+            <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-accent-teal-500" />
               Training Progress
             </h3>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-500">Round Progress</span>
-                  <span className="font-mono text-text-primary">87%</span>
+                  <span className="text-neutral-500">Round Progress</span>
+                  <span className="font-mono text-neutral-800">87%</span>
                 </div>
-                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-medical-teal rounded-full transition-all duration-1000" style={{ width: '87%' }} />
+                <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-accent-teal-500 rounded-full transition-all duration-1000" style={{ width: '87%' }} />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-500">Convergence</span>
-                  <span className="font-mono text-text-primary">92%</span>
+                  <span className="text-neutral-500">Convergence</span>
+                  <span className="font-mono text-neutral-800">92%</span>
                 </div>
-                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                   <div className="h-full bg-risk-low rounded-full transition-all duration-1000" style={{ width: '92%' }} />
                 </div>
               </div>
-              <div className="pt-2 border-t border-gray-100 text-xs text-gray-400">
-                Next aggregation in ~{Math.floor(Math.random() * 30 + 10)}s
+              <div className="pt-2 border-t border-neutral-100 text-xs text-neutral-400">
+                Next aggregation in ~{nextAggregationTime}s
               </div>
             </div>
           </div>

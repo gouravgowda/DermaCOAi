@@ -1,60 +1,69 @@
 import { cn } from '@/lib/utils'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GuidanceOverlay.tsx — Camera viewfinder guidance
+//
+// Shows animated brackets + quality indicator while capturing.
+// States: searching (amber), adjusting (amber), optimal (green).
+//
+// TODO: The bracket animation is pure CSS — add a "hold steady" vibration
+//   feedback when transitioning to optimal. Works on Android via
+//   navigator.vibrate() but iOS needs the Haptic API.
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface GuidanceOverlayProps {
-  status: 'searching' | 'adjusting' | 'optimal' | null
+  confidence: number
+  guidance: 'searching' | 'adjusting' | 'optimal'
   className?: string
 }
 
-export function GuidanceOverlay({ status, className }: GuidanceOverlayProps) {
-  if (!status) return null
+export function GuidanceOverlay({ confidence, guidance, className }: GuidanceOverlayProps) {
+  const qualityColor =
+    guidance === 'optimal' ? 'text-risk-low' :
+    guidance === 'adjusting' ? 'text-risk-medium' : 'text-risk-medium'
 
-  const config = {
-    searching: { text: 'Center the wound area', subtext: 'Optimal distance: 10–15 cm', bg: 'bg-space-800/80', ring: 'border-nebula-500/30' },
-    adjusting: { text: 'Hold steady...', subtext: 'Almost there — keep distance', bg: 'bg-amber-500/10', ring: 'border-amber-400/40' },
-    optimal: { text: '✓ Perfect', subtext: 'Tap capture now', bg: 'bg-emerald-500/10', ring: 'border-emerald-400/40' },
-  }
+  const qualityBg =
+    guidance === 'optimal' ? 'bg-emerald-50 border-emerald-200' :
+    guidance === 'adjusting' ? 'bg-amber-50 border-amber-200' : 'bg-amber-50 border-amber-200'
 
-  const { text, subtext, bg, ring } = config[status]
+  const bracketColor =
+    guidance === 'optimal' ? 'stroke-risk-low' :
+    guidance === 'adjusting' ? 'stroke-risk-medium' : 'stroke-risk-medium'
+
+  const qualityText =
+    guidance === 'optimal' ? '✅ Optimal — Tap to capture' :
+    guidance === 'adjusting' ? '🔄 Adjusting focus...' : '🔍 Searching for wound area...'
 
   return (
-    <div className={cn('absolute inset-0 pointer-events-none z-10', className)}>
+    <div className={cn('absolute inset-0 pointer-events-none', className)}>
       {/* Animated corner brackets */}
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 400" fill="none">
-        <g className={cn(status === 'optimal' ? 'stroke-emerald-400' : 'stroke-nebula-400/50')}>
-          <path d="M80,20 L20,20 L20,80" strokeWidth="2" strokeLinecap="round" className="animate-pulse" />
-          <path d="M320,20 L380,20 L380,80" strokeWidth="2" strokeLinecap="round" className="animate-pulse" style={{ animationDelay: '150ms' }} />
-          <path d="M80,380 L20,380 L20,320" strokeWidth="2" strokeLinecap="round" className="animate-pulse" style={{ animationDelay: '300ms' }} />
-          <path d="M320,380 L380,380 L380,320" strokeWidth="2" strokeLinecap="round" className="animate-pulse" style={{ animationDelay: '450ms' }} />
-        </g>
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        {/* Top-left */}
+        <path d="M 15 25 L 15 15 L 25 15" fill="none" className={cn('stroke-2', bracketColor)} strokeLinecap="round">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" />
+        </path>
+        {/* Top-right */}
+        <path d="M 75 15 L 85 15 L 85 25" fill="none" className={cn('stroke-2', bracketColor)} strokeLinecap="round">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" begin="0.5s" />
+        </path>
+        {/* Bottom-left */}
+        <path d="M 15 75 L 15 85 L 25 85" fill="none" className={cn('stroke-2', bracketColor)} strokeLinecap="round">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" begin="1s" />
+        </path>
+        {/* Bottom-right */}
+        <path d="M 75 85 L 85 85 L 85 75" fill="none" className={cn('stroke-2', bracketColor)} strokeLinecap="round">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" begin="1.5s" />
+        </path>
       </svg>
 
-      {/* Center guidance pill */}
-      <div className="absolute inset-0 flex items-center justify-center">
+      {/* Quality indicator pill */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
         <div className={cn(
-          'px-6 py-4 rounded-2xl backdrop-blur-xl text-center transition-all duration-500 max-w-[280px] border',
-          bg, ring
+          'px-4 py-2 rounded-full border text-sm font-medium shadow-clinical flex items-center gap-2',
+          qualityBg, qualityColor
         )}>
-          <p className={cn(
-            'text-lg font-bold text-surgical-50',
-            status === 'searching' && 'animate-pulse'
-          )}>
-            {text}
-          </p>
-          <p className="text-xs text-surgical-100/50 mt-1">{subtext}</p>
-        </div>
-      </div>
-
-      {/* Bottom quality indicator */}
-      <div className="absolute bottom-32 left-0 right-0 flex justify-center">
-        <div className={cn(
-          'px-4 py-2 rounded-full backdrop-blur-md text-[11px] font-medium border',
-          status === 'optimal'
-            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-            : status === 'adjusting'
-            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-            : 'bg-space-800/60 text-surgical-100/50 border-white/[0.06]'
-        )}>
-          Quality: {status === 'optimal' ? '● Excellent' : status === 'adjusting' ? '◐ Adjusting' : '○ Searching'}
+          <span>{qualityText}</span>
+          <span className="font-mono text-xs opacity-60">{Math.round(confidence * 100)}%</span>
         </div>
       </div>
     </div>

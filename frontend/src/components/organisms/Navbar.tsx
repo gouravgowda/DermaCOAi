@@ -2,6 +2,14 @@ import { Link, useLocation } from 'react-router-dom'
 import { Stethoscope, Search, Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Navbar.tsx — Top navigation bar
+//
+// Switched from dark glassmorphism to clean white chrome. Dr. Leena said
+// the dark nav made the app look like "a hacker tool" on her iPhone.
+// The white + medical blue combination tested well with ASHA workers.
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function Navbar() {
   const location = useLocation()
 
@@ -12,16 +20,16 @@ export function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-space-950/80 backdrop-blur-xl border-b border-white/[0.06]">
+    <header className="sticky top-0 z-50 bg-clinical-white/90 backdrop-blur-xl border-b border-neutral-200 shadow-clinical">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2.5 min-h-[44px]">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-nebula-400 to-nebula-600 flex items-center justify-center shadow-lg shadow-nebula-500/20">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-teal-500 to-medical-blue-500 flex items-center justify-center shadow-sm">
             <Stethoscope className="w-4 h-4 text-white" />
           </div>
           <div>
-            <span className="font-display font-bold text-surgical-50 text-sm tracking-tight">DermaScope</span>
-            <span className="text-nebula-400 text-sm font-bold ml-1">AI</span>
+            <span className="font-display font-bold text-neutral-800 text-sm tracking-tight">DermaScope</span>
+            <span className="text-accent-teal-500 text-sm font-bold ml-1">AI</span>
           </div>
         </Link>
 
@@ -36,8 +44,8 @@ export function Navbar() {
                 className={cn(
                   'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px] flex items-center',
                   active
-                    ? 'bg-nebula-500/10 text-nebula-400 shadow-sm'
-                    : 'text-surgical-100/50 hover:text-surgical-50 hover:bg-white/[0.04]'
+                    ? 'bg-medical-blue-50 text-medical-blue-600'
+                    : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
                 )}
               >
                 {link.label}
@@ -49,19 +57,19 @@ export function Navbar() {
         {/* Actions */}
         <div className="flex items-center gap-2">
           <button
-            className="p-2.5 rounded-xl text-surgical-100/50 hover:text-surgical-50 hover:bg-white/[0.06] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2.5 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Search"
           >
             <Search className="w-4.5 h-4.5" />
           </button>
           <button
-            className="p-2.5 rounded-xl text-surgical-100/50 hover:text-surgical-50 hover:bg-white/[0.06] transition-colors relative min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2.5 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors relative min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Notifications"
           >
             <Bell className="w-4.5 h-4.5" />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-nebula-400 rounded-full" />
+            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-accent-teal-500 rounded-full" />
           </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-nebula-500 to-nebula-600 flex items-center justify-center text-white text-xs font-bold ml-1">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-medical-blue-500 to-accent-teal-500 flex items-center justify-center text-white text-xs font-bold ml-1">
             DS
           </div>
         </div>

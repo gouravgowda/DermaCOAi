@@ -59,7 +59,11 @@ export function WoundTimeline({ images, patientName, className }: WoundTimelineP
                       <p className="text-xs text-gray-400 mt-0.5">{formatDate(image.timestamp)}</p>
                     )}
                   </div>
-                  <Badge variant={riskLevel}>
+                  <Badge variant={
+                    riskLevel === 'high' ? 'danger' :
+                    riskLevel === 'medium' ? 'warning' :
+                    'success'
+                  }>
                     {image.melanomaRisk !== undefined ? 'Melanoma' : 'Infection'}: {(score * 100).toFixed(0)}%
                   </Badge>
                 </div>

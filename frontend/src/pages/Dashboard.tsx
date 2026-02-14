@@ -57,22 +57,20 @@ export function Dashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-6">
       {/* Hero — "Limbs Saved" counter */}
-      {/* This gradient took 45 minutes to get right. space-800 → space-900 → space-950
-          gives much better depth perception than a flat bg. Tested on Dr. Leena's
-          iPhone and my Pixel 7. The decorative grid on the right is invisible on
-          Samsung's oversaturated AMOLED but looks great on iPhone. – Gourav */}
-      <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-space-800 via-space-900 to-space-950 border border-white/[0.06] p-6 sm:p-10 mb-8 animate-hero-in">
+      {/* Blue gradient hero — tested on Dr. Leena's iPhone and Pixel 7.
+          The medical-blue gradient looks professional and trustworthy. */}
+      <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-medical-blue-500 via-medical-blue-600 to-medical-blue-700 border border-medical-blue-400/20 p-6 sm:p-10 mb-8 animate-hero-in">
         <div className="relative z-10">
           {/* Greeting */}
           <div className="flex items-center gap-2 mb-6">
-            <div className="w-[42px] h-[42px] rounded-[13px] bg-gradient-to-br from-nebula-400 to-nebula-600 flex items-center justify-center shadow-[0_8px_32px_rgba(6,182,212,0.3)]">
+            <div className="w-[42px] h-[42px] rounded-[13px] bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-sm">
               {/* 42px not 40px, 13px not 12px — aligns better with the greeting text baseline */}
               <Stethoscope className="w-5 h-5 text-white" />
             </div>
             <div className="-ml-[1px]">
               {/* Slight overlap feels organic */}
-              <p className="text-surgical-100/50 text-sm">{greeting}, Dr. Sharma</p>
-              <p className="text-surgical-100/30 text-xs">Ready to save another limb today?</p>
+              <p className="text-white/80 text-sm">{greeting}, Dr. Sharma</p>
+              <p className="text-white/50 text-xs">Ready to save another limb today?</p>
             </div>
           </div>
 
@@ -80,19 +78,19 @@ export function Dashboard() {
           <div className="text-center py-[26px]">
             {/* 26px not 24px — gives the number more breathing room on small screens */}
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Heart className="w-5 h-5 text-crimson-400 animate-pulse" />
-              <span className="text-xs text-surgical-100/40 uppercase tracking-widest font-medium">Lives Impacted</span>
+              <Heart className="w-5 h-5 text-red-300 animate-pulse" />
+              <span className="text-xs text-white/60 uppercase tracking-widest font-medium">Lives Impacted</span>
             </div>
-            <h2 className="font-display text-6xl sm:text-7xl font-bold gradient-text-teal tracking-tight">
+            <h2 className="font-display text-6xl sm:text-7xl font-bold text-white tracking-tight">
               <CountUp end={3427} />
             </h2>
-            <p className="text-surgical-100/50 mt-2 text-sm">Limbs saved this month across 523 PHCs</p>
+            <p className="text-white/70 mt-2 text-sm">Limbs saved this month across 523 PHCs</p>
             {/* ^ Hardcoded. See TODO at top of file. */}
           </div>
 
           {/* CTA */}
           <div className="flex justify-center mt-4">
-            <Link to="/capture" className="btn-primary gap-2 px-8 shadow-[0_8px_32px_rgba(6,182,212,0.2)] hover:shadow-[0_12px_48px_rgba(6,182,212,0.35)] hover:scale-[1.03] transition-all duration-200">
+            <Link to="/capture" className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-white text-medical-blue-600 font-semibold text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-95 transition-all duration-200 min-h-[48px]">
               <Camera className="w-5 h-5" />
               Start New Scan
             </Link>
@@ -100,13 +98,13 @@ export function Dashboard() {
         </div>
 
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-nebula-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-20 w-32 h-32 bg-nebula-500/[0.03] rounded-full blur-2xl" />
-        <div className="absolute top-6 right-8 hidden sm:block opacity-[0.04]">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-20 w-32 h-32 bg-white/[0.03] rounded-full blur-2xl" />
+        <div className="absolute top-6 right-8 hidden sm:block opacity-[0.08]">
           <div className="grid grid-cols-4 gap-[9px]">
             {/* 9px gap, not 8px — yes this is intentional, looks less "gridded" */}
             {Array.from({ length: 16 }).map((_, i) => (
-              <div key={i} className="w-6 h-6 rounded border border-nebula-500" />
+              <div key={i} className="w-6 h-6 rounded border border-white" />
             ))}
           </div>
         </div>
@@ -126,38 +124,38 @@ export function Dashboard() {
 
       {/* Feature highlights */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="card group hover:border-nebula-500/30 transition-all duration-300 animate-stagger-fade" style={{ animationDelay: '400ms' }}>
-          <div className="p-[11px] rounded-[11px] bg-nebula-500/10 text-nebula-400 w-fit mb-3 group-hover:scale-110 transition-transform">
+        <div className="card group hover:border-accent-teal-500/30 transition-all duration-300 animate-stagger-fade" style={{ animationDelay: '400ms' }}>
+          <div className="p-[11px] rounded-[11px] bg-accent-teal-500/10 text-accent-teal-500 w-fit mb-3 group-hover:scale-110 transition-transform">
             {/* 11px not 10px — icon looked cramped at 10px */}
             <Zap className="w-5 h-5" />
           </div>
-          <h3 className="font-semibold text-surgical-50 text-sm">Edge AI Analysis</h3>
-          <p className="text-xs text-surgical-100/40 mt-1">ONNX-powered analysis runs on smartphone. No internet required.</p>
+          <h3 className="font-semibold text-neutral-800 text-sm">Edge AI Analysis</h3>
+          <p className="text-xs text-neutral-500 mt-1">ONNX-powered analysis runs on smartphone. No internet required.</p>
         </div>
         <div className="card group hover:border-emerald-500/30 transition-all duration-300 animate-stagger-fade" style={{ animationDelay: '500ms' }}>
-          <div className="p-[11px] rounded-[11px] bg-emerald-500/10 text-emerald-400 w-fit mb-3 group-hover:scale-110 transition-transform">
+          <div className="p-[11px] rounded-[11px] bg-emerald-50 text-risk-low w-fit mb-3 group-hover:scale-110 transition-transform">
             <Shield className="w-5 h-5" />
           </div>
-          <h3 className="font-semibold text-surgical-50 text-sm">DPDP Act Compliant</h3>
-          <p className="text-xs text-surgical-100/40 mt-1">Patient data stays on device. Federated learning ensures privacy.</p>
+          <h3 className="font-semibold text-neutral-800 text-sm">DPDP Act Compliant</h3>
+          <p className="text-xs text-neutral-500 mt-1">Patient data stays on device. Federated learning ensures privacy.</p>
           {/* TODO: Need to add actual consent flow per DPDP Act Section 6.
               Rajesh says we need a separate "data principal" consent screen
               before capturing any wound images. Add after demo. */}
         </div>
         <div className="card group hover:border-amber-500/30 transition-all duration-300 animate-stagger-fade" style={{ animationDelay: '600ms' }}>
-          <div className="p-[11px] rounded-[11px] bg-amber-500/10 text-amber-400 w-fit mb-3 group-hover:scale-110 transition-transform">
+          <div className="p-[11px] rounded-[11px] bg-amber-50 text-risk-medium w-fit mb-3 group-hover:scale-110 transition-transform">
             <Users className="w-5 h-5" />
           </div>
-          <h3 className="font-semibold text-surgical-50 text-sm">ASHA Worker Ready</h3>
-          <p className="text-xs text-surgical-100/40 mt-1">Hinglish protocols. Simple interface for community health workers.</p>
+          <h3 className="font-semibold text-neutral-800 text-sm">ASHA Worker Ready</h3>
+          <p className="text-xs text-neutral-500 mt-1">Hinglish protocols. Simple interface for community health workers.</p>
         </div>
       </div>
 
       {/* Recent patients */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-surgical-50">Recent Patients</h3>
-          <span className="text-xs text-surgical-100/30 font-mono">{mockPatients.length} records</span>
+          <h3 className="text-lg font-semibold text-neutral-800">Recent Patients</h3>
+          <span className="text-xs text-neutral-400 font-mono">{mockPatients.length} records</span>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {mockPatients.map((patient, i) => (

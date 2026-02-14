@@ -51,7 +51,13 @@ export function PatientDetail() {
             </h2>
             <p className="text-xs text-gray-400">{patient.id}</p>
           </div>
-          <Badge variant={riskLevel}>{riskLevel.toUpperCase()}</Badge>
+          <Badge variant={
+            riskLevel === 'high' ? 'danger' :
+            riskLevel === 'medium' ? 'warning' :
+            'success'
+          }>
+            {riskLevel.toUpperCase()}
+          </Badge>
         </div>
       </header>
 

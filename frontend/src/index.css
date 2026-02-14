@@ -2,54 +2,74 @@
 
 @import "tailwindcss";
 
-/* ── LUMINA HEALTH Design System ── */
+/* ── DERMASCOPE AI – Light Medical Design System ── */
+/* Switched from dark "Lumina Health" to light medical-grade palette.
+   Dr. Leena said the dark theme was "too gamer" for clinical settings.
+   The light theme tested much better with ASHA workers in Mehsana. – Gourav */
 @theme {
-  /* Space palette (OLED-friendly darks) */
-  --color-space-950: #05050A;
-  --color-space-900: #0A0A14;
-  --color-space-800: #141422;
-  --color-space-700: #1E1E33;
+  /* Clinical Whites */
+  --color-clinical-white: #FFFFFF;
+  --color-clinical-cream: #F9FBFD;
 
-  /* Nebula – premium teal */
-  --color-nebula-300: #67E8F9;
-  --color-nebula-400: #22D3EE;
-  --color-nebula-500: #06B6D4;
-  --color-nebula-600: #0891B2;
+  /* Medical Blues (Professional, Trustworthy) */
+  --color-medical-blue-50: #E6F0F7;
+  --color-medical-blue-100: #CCE1EF;
+  --color-medical-blue-200: #99C3DF;
+  --color-medical-blue-300: #66A5CF;
+  --color-medical-blue-400: #3387BF;
+  --color-medical-blue-500: #0069AF;
+  --color-medical-blue-600: #00548C;
+  --color-medical-blue-700: #003F69;
+  --color-medical-blue-800: #002A46;
+  --color-medical-blue-900: #001523;
 
-  /* Surgical whites */
-  --color-surgical-50: #F9FAFB;
-  --color-surgical-100: #F3F4F6;
-  --color-surgical-200: #E5E7EB;
+  /* Accent Teal (Tech-forward but clinical) */
+  --color-accent-teal-400: #20C9D2;
+  --color-accent-teal-500: #00B6C7;
+  --color-accent-teal-600: #0092A0;
 
-  /* Amber warnings */
+  /* Semantic Colors */
+  --color-risk-low: #10B981;
+  --color-risk-medium: #F59E0B;
+  --color-risk-high: #DC2626;
+
+  /* Neutrals (Warm grays) */
+  --color-neutral-50: #F9FAFB;
+  --color-neutral-100: #F3F4F6;
+  --color-neutral-200: #E5E7EB;
+  --color-neutral-300: #D1D5DB;
+  --color-neutral-400: #9CA3AF;
+  --color-neutral-500: #6B7280;
+  --color-neutral-600: #4B5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1F2937;
+  --color-neutral-900: #111827;
+
+  /* Legacy aliases — kept for components that still reference old tokens */
+  --color-medical-teal: #00B6C7;
+  --color-medical-red: #DC2626;
+  --color-medical-green: #10B981;
+  --color-bg-primary: #F9FBFD;
+  --color-text-primary: #1F2937;
+  --color-border-focus: #00B6C7;
+
+  /* Emerald / Crimson / Amber — kept for semantic usage */
+  --color-emerald-400: #34D399;
+  --color-emerald-500: #10B981;
   --color-amber-400: #FBBF24;
   --color-amber-500: #F59E0B;
-
-  /* Crimson alerts */
   --color-crimson-400: #F87171;
   --color-crimson-500: #EF4444;
   --color-crimson-600: #DC2626;
-
-  /* Emerald success */
-  --color-emerald-400: #34D399;
-  --color-emerald-500: #10B981;
-
-  /* Legacy aliases */
-  --color-medical-blue: #0A2540;
-  --color-medical-teal: #06B6D4;
-  --color-medical-red: #EF4444;
-  --color-medical-green: #10B981;
-  --color-risk-low: #10B981;
-  --color-risk-medium: #F59E0B;
-  --color-risk-high: #EF4444;
-  --color-bg-primary: #05050A;
-  --color-text-primary: #F9FAFB;
-  --color-border-focus: #06B6D4;
 
   /* Typography */
   --font-display: 'Inter', system-ui, sans-serif;
   --font-sans: 'Inter', system-ui, 'Noto Sans Devanagari', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* Shadows (Soft, clinical – blue-tinted for medical feel) */
+  --shadow-clinical: 0 4px 6px -1px rgba(0, 105, 175, 0.05), 0 2px 4px -1px rgba(0, 105, 175, 0.03);
+  --shadow-clinical-lg: 0 10px 15px -3px rgba(0, 105, 175, 0.07), 0 4px 6px -2px rgba(0, 105, 175, 0.03);
 
   /* Animations */
   --animate-hero-in: heroIn 800ms cubic-bezier(0.2, 0.0, 0.0, 1) forwards;
@@ -74,16 +94,16 @@
     100% { opacity: 1; transform: translateY(0); }
   }
   @keyframes riskPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-    50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3); }
+    50% { box-shadow: 0 0 0 16px rgba(220, 38, 38, 0); }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-12px); }
   }
   @keyframes glow {
-    0%, 100% { box-shadow: 0 0 4px rgba(6, 182, 212, 0.4); }
-    50% { box-shadow: 0 0 24px rgba(6, 182, 212, 0.7); }
+    0%, 100% { box-shadow: 0 0 4px rgba(0, 182, 199, 0.3); }
+    50% { box-shadow: 0 0 24px rgba(0, 182, 199, 0.5); }
   }
   @keyframes shimmer {
     0% { background-position: -1000px 0; }
@@ -120,12 +140,12 @@
   html {
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
-    background-color: var(--color-space-950);
-    color: var(--color-surgical-50);
+    background-color: var(--color-clinical-cream);
+    color: var(--color-neutral-800);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -144,47 +164,49 @@
 
   *:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-nebula-500);
+    box-shadow: 0 0 0 2px var(--color-accent-teal-500);
   }
 }
 
 /* ── Components ── */
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-nebula-500 to-nebula-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:shadow-lg hover:shadow-nebula-500/30 active:scale-95 inline-flex items-center justify-center;
+    @apply bg-gradient-to-r from-accent-teal-500 to-accent-teal-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:shadow-lg hover:shadow-accent-teal-500/20 active:scale-95 inline-flex items-center justify-center;
     min-height: 48px;
     min-width: 48px;
   }
   .btn-secondary {
-    @apply bg-space-800 text-surgical-100 border border-nebula-500/20 px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-space-700 hover:border-nebula-500/40 active:scale-95 inline-flex items-center justify-center;
+    @apply bg-clinical-white text-neutral-700 border border-neutral-200 px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-neutral-50 hover:border-neutral-300 active:scale-95 inline-flex items-center justify-center;
     min-height: 48px;
     min-width: 48px;
   }
   .btn-danger {
-    @apply bg-gradient-to-r from-crimson-500 to-crimson-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:shadow-lg hover:shadow-crimson-500/30 active:scale-95 inline-flex items-center justify-center;
+    @apply bg-gradient-to-r from-risk-high to-crimson-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:shadow-lg hover:shadow-crimson-500/20 active:scale-95 inline-flex items-center justify-center;
     min-height: 48px;
     min-width: 48px;
   }
   .card {
-    @apply bg-space-800/60 backdrop-blur-xl rounded-2xl border border-white/[0.06] p-6 shadow-xl;
+    @apply bg-clinical-white rounded-2xl border border-neutral-200 p-6;
+    box-shadow: var(--shadow-clinical);
   }
   .card-glass {
-    @apply bg-space-800/40 backdrop-blur-xl border border-nebula-500/10 rounded-2xl p-6 shadow-2xl;
+    @apply bg-clinical-white/80 backdrop-blur-xl border border-neutral-200 rounded-2xl p-6;
+    box-shadow: var(--shadow-clinical-lg);
   }
   .input-clinical {
-    @apply w-full px-4 py-3 bg-space-800 border border-white/10 rounded-xl text-surgical-50 outline-none transition-all duration-200 placeholder:text-surgical-100/30;
+    @apply w-full px-4 py-3 bg-clinical-white border border-neutral-200 rounded-xl text-neutral-800 outline-none transition-all duration-200 placeholder:text-neutral-400;
   }
   .input-clinical:focus {
-    border-color: var(--color-nebula-500);
-    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+    border-color: var(--color-accent-teal-500);
+    box-shadow: 0 0 0 3px rgba(0, 182, 199, 0.15);
   }
 
   /* Gradient text utility */
   .gradient-text {
-    @apply bg-gradient-to-r from-surgical-50 to-nebula-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-medical-blue-600 to-accent-teal-500 bg-clip-text text-transparent;
   }
   .gradient-text-teal {
-    @apply bg-gradient-to-r from-nebula-400 to-emerald-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-accent-teal-500 to-risk-low bg-clip-text text-transparent;
   }
 }
 
@@ -229,10 +251,18 @@
     stroke-dasharray: 500;
     animation: draw 1.5s ease-out forwards;
   }
+
+  /* Clinical shadow utilities */
+  .shadow-clinical {
+    box-shadow: var(--shadow-clinical);
+  }
+  .shadow-clinical-lg {
+    box-shadow: var(--shadow-clinical-lg);
+  }
 }
 
 /* ── Selection ── */
 ::selection {
-  background: rgba(6, 182, 212, 0.3);
-  color: #f9fafb;
+  background: rgba(0, 182, 199, 0.2);
+  color: #1f2937;
 }

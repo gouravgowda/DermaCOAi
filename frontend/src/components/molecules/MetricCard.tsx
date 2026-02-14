@@ -38,52 +38,55 @@ export function MetricCard({ label, value, change, icon, className }: MetricCard
       return
     }
 
-    const hasPercent = value.includes('%')
-    const isDecimal = value.includes('.') && !value.includes(',')
+    const prefix = value.match(/^[^0-9]*/)?.[0] || ''
+    const suffix = value.match(/[^0-9.]*$/)?.[0] || ''
+    const hasDecimal = value.includes('.')
     const start = performance.now()
-    const duration = 1500
+    const duration = 1200
 
     function tick(now: number) {
       const elapsed = now - start
       const progress = Math.min(elapsed / duration, 1)
       const eased = 1 - Math.pow(1 - progress, 3)
       const current = numeric * eased
-
-      let formatted: string
-      if (isDecimal) {
-        formatted = current.toFixed(1)
-      } else {
-        formatted = Math.round(current).toLocaleString('en-IN')
-      }
-      if (hasPercent) formatted += '%'
-      setDisplayValue(formatted)
-
+      const formatted = hasDecimal
+        ? current.toFixed(1)
+        : Math.round(current).toLocaleString('en-IN')
+      setDisplayValue(`${prefix}${formatted}${suffix}`)
       if (progress < 1) animRef.current = requestAnimationFrame(tick)
     }
-
     animRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(animRef.current)
   }, [value])
 
+  const trend = change == null ? null : change > 0 ? 'up' : change < 0 ? 'down' : 'flat'
+
   return (
-    <div className={cn('card group hover:border-nebula-500/20 transition-all duration-300', className)}>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-surgical-100/40 uppercase tracking-wide">{label}</span>
+    <div className={cn(
+      'card hover:shadow-clinical-lg transition-all duration-300 animate-count-in',
+      className
+    )}>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">{label}</p>
         {icon && (
-          <div className="p-2 rounded-xl bg-nebula-500/10 text-nebula-400 group-hover:scale-110 transition-transform">
+          <div className="p-2 rounded-xl bg-medical-blue-50 text-medical-blue-500">
             {icon}
           </div>
         )}
       </div>
-      <p className="text-2xl font-bold font-mono text-surgical-50 tracking-tight">{displayValue}</p>
-      {change !== undefined && (
+      <p className="text-2xl font-bold text-medical-blue-600 font-mono tracking-tight">
+        {displayValue}
+      </p>
+      {trend && (
         <div className={cn(
-          'flex items-center gap-1 mt-2 text-xs font-medium',
-          change > 0 ? 'text-emerald-400' : change < 0 ? 'text-crimson-400' : 'text-surgical-100/40'
+          'flex items-center gap-1 mt-1.5 text-xs font-medium',
+          trend === 'up' ? 'text-risk-low' : trend === 'down' ? 'text-risk-high' : 'text-neutral-400'
         )}>
-          {change > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : change < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
-          {change > 0 && '+'}{change}%
-          <span className="text-surgical-100/30 ml-1">vs last month</span>
+          {trend === 'up' && <TrendingUp className="w-3.5 h-3.5" />}
+          {trend === 'down' && <TrendingDown className="w-3.5 h-3.5" />}
+          {trend === 'flat' && <Minus className="w-3.5 h-3.5" />}
+          <span>{change! > 0 ? '+' : ''}{change}%</span>
+          <span className="text-neutral-400 ml-0.5">vs last month</span>
         </div>
       )}
     </div>

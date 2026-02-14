@@ -1,64 +1,75 @@
-import { cn, formatDate, truncate } from '@/lib/utils'
-import { Badge } from '@/components/atoms/Badge'
-import { MapPin, Calendar, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Patient } from '@/types'
+import { Badge } from '@/components/atoms/Badge'
+import { MapPin, Calendar, ChevronRight } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PatientCard.tsx — Patient summary card
+//
+// Dr. Leena asked for age + location visible without clicking.
+// Also shows a "story" snippet — ASHA workers liked reading about
+// similar cases from other PHCs. Builds trust in the system.
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface PatientCardProps {
   patient: Patient
   className?: string
 }
 
-export function PatientCard({ patient, className }: PatientCardProps) {
+function getRiskVariant(patient: Patient): 'success' | 'warning' | 'danger' {
   const latestImage = patient.images[patient.images.length - 1]
-  const latestInfection = latestImage?.infection ?? latestImage?.melanomaRisk ?? 0
-  const riskLevel = latestInfection >= 0.7 ? 'high' : latestInfection >= 0.4 ? 'medium' : 'low'
+  if (!latestImage) return 'success'
+  const risk = latestImage.infection ?? latestImage.melanomaRisk ?? 0
+  if (risk > 0.6) return 'danger'
+  if (risk > 0.3) return 'warning'
+  return 'success'
+}
 
+function getRiskLabel(patient: Patient): string {
+  const latestImage = patient.images[patient.images.length - 1]
+  if (!latestImage) return 'Low Risk'
+  const risk = latestImage.infection ?? latestImage.melanomaRisk ?? 0
+  if (risk > 0.6) return 'High Risk'
+  if (risk > 0.3) return 'Medium Risk'
+  return 'Low Risk'
+}
+
+export function PatientCard({ patient, className }: PatientCardProps) {
   return (
     <Link
       to={`/patient/${patient.id}`}
       className={cn(
-        'card group hover:border-nebula-500/20 transition-all duration-300 cursor-pointer',
+        'card group hover:shadow-clinical-lg hover:border-medical-blue-200 transition-all duration-300 block',
         className
       )}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-surgical-50 truncate">{patient.name}</h3>
-            <Badge variant={riskLevel}>{riskLevel}</Badge>
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <h3 className="font-semibold text-neutral-800 group-hover:text-medical-blue-600 transition-colors truncate">
+              {patient.name}
+            </h3>
+            <Badge variant={getRiskVariant(patient)}>{getRiskLabel(patient)}</Badge>
           </div>
 
-          <div className="flex items-center gap-3 mt-1.5 text-sm text-surgical-100/40">
+          <div className="flex items-center gap-3 text-xs text-neutral-500 mb-2">
             <span className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
+              <Calendar className="w-3 h-3" />
+              {patient.age}y • {patient.gender}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
               {patient.location}
             </span>
-            <span>•</span>
-            <span>{patient.age}y</span>
           </div>
 
-          <p className="text-sm text-surgical-100/50 mt-2 line-clamp-2">
-            {truncate(patient.story, 120)}
+          <p className="text-sm text-neutral-500 line-clamp-2 leading-relaxed">
+            {patient.story}
           </p>
-
-          <div className="flex items-center gap-2 mt-3 text-xs text-surgical-100/30">
-            <Calendar className="w-3 h-3" />
-            {formatDate(patient.createdAt)}
-            <span className="ml-auto text-nebula-400 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-              View Details <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          </div>
         </div>
 
-        <div className="ml-4 flex-shrink-0 w-16 h-16 rounded-xl bg-space-700 overflow-hidden">
-          <div
-            className="w-full h-full bg-gradient-to-br from-nebula-500/20 to-space-800 flex items-center justify-center text-nebula-400/40 text-xs font-mono"
-            aria-label={`Wound image for ${patient.name}`}
-          >
-            {patient.images.length} img
-          </div>
-        </div>
+        <ChevronRight className="w-5 h-5 text-neutral-300 group-hover:text-medical-blue-500 transition-colors flex-shrink-0 mt-1" />
       </div>
     </Link>
   )
