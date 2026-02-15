@@ -104,9 +104,11 @@ export function Dashboard() {
 
       {/* Departments Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-16">
-           <p className="text-blue-600 font-bold uppercase tracking-widest text-sm mb-2">Our Departments</p>
-           <h2 className="text-4xl font-bold text-slate-900">For Your Health</h2>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-16">
+           <div className="text-center">
+             <p className="text-blue-600 font-bold uppercase tracking-widest text-sm mb-2">Our Departments</p>
+             <h2 className="text-4xl font-bold text-slate-900">For Your Health</h2>
+           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -125,6 +127,14 @@ export function Dashboard() {
                 <p className="text-slate-500 group-hover:text-blue-100">{dept.desc}</p>
              </div>
            ))}
+             <div className="group p-8 rounded-3xl border-2 border-dashed border-slate-200 hover:border-blue-600 transition-all duration-300 cursor-pointer text-left flex flex-col items-center justify-center text-center">
+                <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center mb-4 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                  <Stethoscope className="w-7 h-7" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Clinical Partners</h3>
+                <p className="text-sm text-slate-500 mb-2">AIIMS Dermatology Dept</p>
+                <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">Validating Partner</div>
+             </div>
         </div>
       </section>
 

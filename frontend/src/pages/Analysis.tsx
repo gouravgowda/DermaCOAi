@@ -7,6 +7,7 @@ import { Badge } from '@/components/atoms/Badge'
 import { Spinner } from '@/components/atoms/Spinner'
 import { useAnalysisStore } from '@/lib/stores'
 import { generateId } from '@/lib/utils'
+import { APP_CONFIG, FEATURE_FLAGS } from '@/lib/constants'
 
 const Wound3DViewer = lazy(() => import('@/components/organisms/Wound3DViewer'))
 
@@ -15,6 +16,30 @@ export function Analysis() {
   const [activeTab, setActiveTab] = useState<'overview' | '3d'>('overview')
   const [showSuccess, setShowSuccess] = useState(false)
   const [animatedVelocity, setAnimatedVelocity] = useState(0)
+
+  // FHIR R4 Generation
+  useEffect(() => {
+    if (currentAnalysis && FEATURE_FLAGS.FHIR_EXPORT) {
+      const fhirObservation = {
+        resourceType: "Observation",
+        status: "final",
+        code: { 
+          coding: [{ system: "http://loinc.org", code: "72132-2", display: "Wound Size" }] 
+        },
+        valueQuantity: { 
+          value: currentAnalysis.measurements.area, 
+          unit: "cm2",
+          system: "http://unitsofmeasure.org",
+          code: "cm2"
+        },
+        subject: { reference: `Patient/P-${currentAnalysis.id.slice(0, 8)}` },
+        device: { reference: "Device/dermascope-ai-v0.3" },
+        effectiveDateTime: currentAnalysis.timestamp
+      }
+      console.log('Generated FHIR R4 Observation:', JSON.stringify(fhirObservation, null, 2))
+    }
+  }, [currentAnalysis])
+
 
   // Healing Velocity Animation
   useEffect(() => {
@@ -163,6 +188,11 @@ export function Analysis() {
           <div className="space-y-6">
             <RiskCard riskScore={currentAnalysis.riskScore} factors={currentAnalysis.factors} />
             
+            {/* Validation Data */}
+            <div className="text-xs text-slate-400 text-center px-4">
+              Validated on {APP_CONFIG.CLINICAL_VALIDATION.dataset} • Sensitivity: {APP_CONFIG.CLINICAL_VALIDATION.sensitivity} • Specificity: {APP_CONFIG.CLINICAL_VALIDATION.specificity}
+            </div>
+
             {/* Emergency Escalation */}
             {currentAnalysis.riskScore > 0.7 && (
               <div className="p-4 bg-red-50 border border-red-100 rounded-xl animate-fade-in">
