@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
-import { Activity, Thermometer, Ruler, Info } from 'lucide-react'
+import { Activity, Thermometer, Ruler, Info, AlertTriangle, Phone, Check } from 'lucide-react'
 import { MetricCard } from '@/components/molecules/MetricCard'
 import { RiskCard } from '@/components/molecules/RiskCard'
 import { TreatmentProtocol } from '@/components/organisms/TreatmentProtocol'
@@ -13,6 +13,27 @@ const Wound3DViewer = lazy(() => import('@/components/organisms/Wound3DViewer'))
 export function Analysis() {
   const { currentAnalysis, isAnalyzing, setAnalyzing } = useAnalysisStore()
   const [activeTab, setActiveTab] = useState<'overview' | '3d'>('overview')
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [animatedVelocity, setAnimatedVelocity] = useState(0)
+
+  // Healing Velocity Animation
+  useEffect(() => {
+    if (currentAnalysis) {
+      const healingVelocity = 12 // Target percentages
+      let i = 0
+      const interval = setInterval(() => {
+        i += 1
+        setAnimatedVelocity(i)
+        if (i >= healingVelocity) clearInterval(interval)
+      }, 50)
+      return () => clearInterval(interval)
+    }
+  }, [currentAnalysis])
+
+  const handleSave = () => {
+    setShowSuccess(true)
+    setTimeout(() => setShowSuccess(false), 4000)
+  }
 
   // Simulate analysis if empty
   useEffect(() => {
@@ -52,7 +73,20 @@ export function Analysis() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20 pb-24">
+    <div className="min-h-screen bg-slate-50 pt-20 pb-24 relative">
+      {/* Toast Notification */}
+      {showSuccess && (
+        <div className="fixed top-24 right-6 bg-blue-600 text-white p-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-slide-up">
+          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+            <Check className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="font-bold text-sm">Saved to Ayushman Bharat EHR</p>
+            <p className="text-xs text-blue-100">FHIR R4 Standard • Synced</p>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -65,7 +99,7 @@ export function Analysis() {
           </div>
           <div className="flex gap-2">
             <button className="btn-secondary text-sm py-2">Export PDF</button>
-            <button className="btn-primary text-sm py-2">Save to Record</button>
+            <button onClick={handleSave} className="btn-primary text-sm py-2">Save to Record</button>
           </div>
         </div>
 
@@ -113,10 +147,12 @@ export function Analysis() {
                  className="bg-white"
                />
                <MetricCard 
-                 label="Tissue Temp" 
-                 value="37.2°C" 
+                 label="Healing Velocity" 
+                 value={`+${animatedVelocity}%`} 
                  icon={<Thermometer className="w-5 h-5" />} 
                  className="bg-white"
+                 trend="up"
+                 trendLabel="Faster than avg"
                />
             </div>
             
@@ -126,6 +162,23 @@ export function Analysis() {
           {/* Right Column: Risk & AI Insights */}
           <div className="space-y-6">
             <RiskCard riskScore={currentAnalysis.riskScore} factors={currentAnalysis.factors} />
+            
+            {/* Emergency Escalation */}
+            {currentAnalysis.riskScore > 0.7 && (
+              <div className="p-4 bg-red-50 border border-red-100 rounded-xl animate-fade-in">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-red-900 text-sm">URGENT: Refer to District Hospital</h4>
+                    <p className="text-red-700 text-xs mt-1 mb-3">Risk score indicates potential systemic infection.</p>
+                    <button className="w-full bg-red-600 hover:bg-red-700 text-white text-sm py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                      <Phone className="w-4 h-4" />
+                      Call Dermatologist Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="card bg-blue-600 text-white border-none shadow-xl shadow-blue-600/20">
                <div className="flex items-start gap-4">

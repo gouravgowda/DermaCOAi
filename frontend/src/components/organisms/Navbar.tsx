@@ -7,11 +7,18 @@ export function Navbar() {
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
   const isHome = location.pathname === '/'
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('online', () => setIsOnline(true))
+    window.addEventListener('offline', () => setIsOnline(false))
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('online', () => setIsOnline(true))
+      window.removeEventListener('offline', () => setIsOnline(false))
+    }
   }, [])
 
   const navLinks = [
@@ -61,6 +68,12 @@ export function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
+          {/* Offline Indicator */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+             <div className={cn("w-2 h-2 rounded-full transition-all", isOnline ? "bg-green-500" : "bg-red-500 animate-pulse")} />
+             <span className="text-xs font-medium text-slate-600">{isOnline ? 'Online' : 'Offline'}</span>
+          </div>
+
           <button className={cn(
             "p-2 rounded-full transition-colors",
             scrolled || !isHome ? "text-slate-600 hover:bg-slate-100" : "text-white hover:bg-white/10"

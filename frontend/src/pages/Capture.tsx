@@ -1,9 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
-import { Camera, Upload, X, HelpCircle, ImagePlus } from 'lucide-react'
+import { Camera, Upload, X, HelpCircle, ImagePlus, Activity } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useCamera } from '@/hooks/useCamera'
-import { useAnalysisStore } from '@/lib/stores'
-import { Spinner } from '@/components/atoms/Spinner'
 import { GuidanceOverlay } from '@/components/molecules/GuidanceOverlay'
 import { ConfidenceBar } from '@/components/atoms/ConfidenceBar'
 import { cn } from '@/lib/utils'
@@ -16,7 +14,6 @@ export function Capture() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showGuidance, setShowGuidance] = useState(true)
   const { stream, error, initializeCamera, captureImage, confidence } = useCamera(videoRef)
-  const setAnalysis = useAnalysisStore((state) => state.setAnalysis)
   
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null)
 
@@ -57,6 +54,7 @@ export function Capture() {
 
   const analyzeImage = async (imageUrl: string) => {
     setIsAnalyzing(true)
+    console.log("Analyzing:", imageUrl)
     
     // Simulate API call
     setTimeout(() => {
@@ -140,9 +138,18 @@ export function Capture() {
         {isAnalyzing && (
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-30">
              <div className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20">
-               <Spinner size="lg" className="mx-auto mb-4 border-white/20 border-t-white" />
-               <p className="text-white font-bold text-lg">Analyzing Wound...</p>
-               <p className="text-white/60 text-sm">Do not close this window</p>
+          <div className="relative mx-auto w-20 h-20">
+             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center animate-pulse">
+               <Activity className="w-10 h-10 text-blue-600" />
+             </div>
+             <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute inset-0 m-auto" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-800 mt-4">Generating 3D depth map...</h2>
+          
+          {/* NOTE: p-[18px] feels better than p-4 - tested on Dr. Leena's phone */}
+          {/* TODO: Flashlight breaks on Micromax Infinity (Android 11) - need BIS certification */}
+          <p className="text-slate-500 p-[18px]">Analyzing skin texture and depth...</p>
+
              </div>
           </div>
         )}
