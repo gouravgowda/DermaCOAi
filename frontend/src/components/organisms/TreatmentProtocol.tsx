@@ -1,103 +1,72 @@
 import ReactMarkdown from 'react-markdown'
-import { useProtocolStore } from '@/lib/stores'
-import { ProtocolSkeleton } from '@/components/atoms/Skeleton'
-import { FileText, Edit, Check, AlertCircle } from 'lucide-react'
+import { FileText, Copy, Check, Download, AlertCircle } from 'lucide-react'
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TreatmentProtocol.tsx — AI-generated treatment plan
-//
-// Was using GPT-4 to generate these, switched to Claude 3.5 Sonnet
-// because it was 3x faster and actually followed the ICMR format better.
-// Then switched again to local Gemma 2B for offline PHCs.
-//
-// TODO: The "Edit for Local Formulary" button doesn't work yet.
-//   Dr. Leena wants ASHA workers to be able to swap out unavailable
-//   medicines (e.g., replace Cefalexin with Amoxicillin if the PHC
-//   doesn't stock it). Need a dropdown per medicine line.
-// ─────────────────────────────────────────────────────────────────────────────
+interface TreatmentProtocolProps {
+  protocol: string
+  icdCodes?: string[]
+  className?: string
+}
 
-export function TreatmentProtocol() {
-  const { protocol, loading, error, generate } = useProtocolStore()
+export function TreatmentProtocol({ protocol, icdCodes = [], className }: TreatmentProtocolProps) {
+  const [copied, setCopied] = useState(false)
 
-  if (error) {
-    return (
-      <div className="bg-red-50 rounded-[10px] border-l-4 border-risk-high p-4 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-risk-high flex-shrink-0 mt-[3px]" />
-        <div>
-          <p className="text-sm font-medium text-risk-high">{error}</p>
-          <button
-            onClick={() => generate('retry')}
-            className="text-sm text-accent-teal-500 mt-2 hover:underline"
-          >
-            Retry generation
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (loading) return <ProtocolSkeleton />
-
-  if (!protocol) {
-    return (
-      <div className="card text-center py-8">
-        <FileText className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-        <p className="text-sm text-neutral-500">
-          Treatment protocol will be generated after analysis
-        </p>
-      </div>
-    )
+  const handleCopy = () => {
+    navigator.clipboard.writeText(protocol)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <div className="card border-l-4 border-accent-teal-500">
-      <div className="flex items-center gap-2 mb-3">
-        <FileText className="w-4 h-4 text-accent-teal-500" />
-        <h3 className="text-sm font-semibold text-neutral-800">Treatment Protocol</h3>
-        <span className="text-[10px] text-neutral-400 ml-auto font-mono">
-          Generated {new Date(protocol.generatedAt).toLocaleTimeString('en-IN')}
-        </span>
-      </div>
-
-      <div className="prose prose-sm max-w-none prose-headings:text-neutral-800 prose-p:text-neutral-600 prose-li:text-neutral-600 prose-strong:text-neutral-800 prose-code:text-accent-teal-600 prose-code:bg-accent-teal-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded">
-        <ReactMarkdown>{protocol.markdown}</ReactMarkdown>
-      </div>
-
-      {/* ICD codes */}
-      {protocol.icdCodes.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-neutral-200">
-          <p className="text-xs text-neutral-400 mb-1.5">ICD-10 Codes</p>
-          <div className="flex flex-wrap gap-1.5">
-            {protocol.icdCodes.map((code) => (
-              <code
-                key={code}
-                className="text-xs px-2 py-0.5 rounded-[6px] bg-neutral-100 text-neutral-600 font-mono border border-neutral-200"
-              >
-                {code}
-              </code>
-            ))}
+    <div className={cn('card border-t-4 border-t-blue-600', className)}>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+            <FileText className="w-5 h-5" />
           </div>
+          <h3 className="text-lg font-bold text-slate-800">Treatment Plan</h3>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleCopy}
+            className="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            title="Copy to clipboard"
+          >
+            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          </button>
+          <button
+            className="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            title="Download PDF"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {icdCodes.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {icdCodes.map((code) => (
+            <span
+              key={code}
+              className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-mono font-medium border border-slate-200"
+            >
+              {code}
+            </span>
+          ))}
         </div>
       )}
 
-      {/* Actions */}
-      <div className="mt-4 flex gap-2">
-        <button className="btn-secondary text-sm gap-1.5">
-          <Edit className="w-3.5 h-3.5" />
-          Edit for Local Formulary
-          {/* FIXME: This button does nothing right now. See TODO above. */}
-        </button>
-        <button className="btn-primary text-sm gap-1.5">
-          <Check className="w-3.5 h-3.5" />
-          Approve & Save
-        </button>
+      <div className="prose prose-sm prose-slate max-w-none">
+        <ReactMarkdown>{protocol}</ReactMarkdown>
       </div>
-
-      {/* Disclaimer */}
-      <p className="text-[10px] text-neutral-400 mt-3 leading-relaxed">
-        ⚠️ AI-generated suggestion only. Must be reviewed by qualified medical professional
-        before implementation. Follow DPDP Act 2023 and ICMR guidelines.
-      </p>
+      
+      <div className="mt-6 pt-4 border-t border-slate-100 flex items-start gap-3">
+        <AlertCircle className="w-4 h-4 text-slate-400 mt-0.5" />
+        <p className="text-xs text-slate-400 leading-relaxed">
+          AI-generated protocol based on visual analysis. This is a recommendation support tool and does not replace professional clinical judgment. Verify all medications and dosages.
+        </p>
+      </div>
     </div>
   )
 }

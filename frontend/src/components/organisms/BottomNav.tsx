@@ -13,7 +13,7 @@ export function BottomNav() {
   const location = useLocation()
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-clinical-white/90 backdrop-blur-xl border-t border-neutral-200 shadow-clinical safe-area-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] safe-area-bottom">
       <div className="flex items-stretch justify-around h-16">
         {tabs.map(({ to, icon: Icon, label }) => {
           const active = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to)
@@ -22,16 +22,11 @@ export function BottomNav() {
               key={to}
               to={to}
               className={cn(
-                'flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-200 min-h-[44px]',
-                active ? 'text-accent-teal-500' : 'text-neutral-400 hover:text-neutral-600'
+                'flex flex-col items-center justify-center flex-1 gap-1 transition-colors min-h-[44px]',
+                active ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'
               )}
             >
-              <div className={cn(
-                'p-1.5 rounded-xl transition-all duration-200',
-                active && 'bg-accent-teal-500/10'
-              )}>
-                <Icon className="w-5 h-5" strokeWidth={active ? 2.2 : 1.5} />
-              </div>
+              <Icon className={cn("w-6 h-6", active && "fill-blue-600/10")} strokeWidth={active ? 2.5 : 2} />
               <span className="text-[10px] font-medium">{label}</span>
             </Link>
           )

@@ -1,77 +1,91 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Stethoscope, Search, Bell } from 'lucide-react'
+import { Stethoscope, Search, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Navbar.tsx — Top navigation bar
-//
-// Switched from dark glassmorphism to clean white chrome. Dr. Leena said
-// the dark nav made the app look like "a hacker tool" on her iPhone.
-// The white + medical blue combination tested well with ASHA workers.
-// ─────────────────────────────────────────────────────────────────────────────
+import { useState, useEffect } from 'react'
 
 export function Navbar() {
   const location = useLocation()
+  const [scrolled, setScrolled] = useState(false)
+  const isHome = location.pathname === '/'
 
-  const links = [
-    { to: '/', label: 'Dashboard' },
-    { to: '/analysis', label: 'Analysis' },
-    { to: '/research', label: 'Research' },
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const navLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'About', href: '#' },
+    { name: 'Find Doctor', href: '/search' },
+    { name: 'Blog', href: '/research' },
+    { name: 'Contact', href: '#' },
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-clinical-white/90 backdrop-blur-xl border-b border-neutral-200 shadow-clinical">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        {/* Brand */}
-        <Link to="/" className="flex items-center gap-2.5 min-h-[44px]">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-teal-500 to-medical-blue-500 flex items-center justify-center shadow-sm">
-            <Stethoscope className="w-4 h-4 text-white" />
+    <header 
+      className={cn(
+        "fixed top-0 inset-x-0 z-50 transition-all duration-300",
+        scrolled || !isHome ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+      )}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center transition-transform group-hover:scale-110">
+            <Stethoscope className="w-5 h-5" />
           </div>
-          <div>
-            <span className="font-display font-bold text-neutral-800 text-sm tracking-tight">DermaScope</span>
-            <span className="text-accent-teal-500 text-sm font-bold ml-1">AI</span>
-          </div>
+          <span className={cn(
+            "font-display font-bold text-xl tracking-tight",
+            scrolled || !isHome ? "text-slate-800" : "text-white"
+          )}>
+            ProHealth
+          </span>
         </Link>
 
-        {/* Nav links (desktop) */}
-        <nav className="hidden md:flex items-center gap-1">
-          {links.map((link) => {
-            const active = location.pathname === link.to
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={cn(
-                  'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px] flex items-center',
-                  active
-                    ? 'bg-medical-blue-50 text-medical-blue-600'
-                    : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
-                )}
-              >
-                {link.label}
-              </Link>
-            )
-          })}
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.name} 
+              to={link.href}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-blue-500",
+                scrolled || !isHome ? "text-slate-600" : "text-white/90 hover:text-white"
+              )}
+            >
+              {link.name}
+            </Link>
+          ))}
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
-          <button
-            className="p-2.5 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Search"
-          >
-            <Search className="w-4.5 h-4.5" />
+        <div className="flex items-center gap-4">
+          <button className={cn(
+            "p-2 rounded-full transition-colors",
+            scrolled || !isHome ? "text-slate-600 hover:bg-slate-100" : "text-white hover:bg-white/10"
+          )}>
+            <Search className="w-5 h-5" />
           </button>
-          <button
-            className="p-2.5 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors relative min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Notifications"
-          >
-            <Bell className="w-4.5 h-4.5" />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-accent-teal-500 rounded-full" />
-          </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-medical-blue-500 to-accent-teal-500 flex items-center justify-center text-white text-xs font-bold ml-1">
-            DS
-          </div>
+          
+          <button className={cn(
+             "p-2 rounded-full transition-colors md:hidden",
+             scrolled || !isHome ? "text-slate-600 hover:bg-slate-100" : "text-white hover:bg-white/10"
+           )}>
+             <User className="w-5 h-5" />
+           </button>
+
+           <Link 
+             to="/login"
+             className={cn(
+               "hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-lg shadow-blue-600/20 hover:-translate-y-0.5",
+               scrolled || !isHome 
+                 ? "bg-blue-600 text-white hover:bg-blue-700" 
+                 : "bg-white text-blue-600 hover:bg-blue-50"
+             )}
+           >
+             Book Now
+           </Link>
         </div>
       </div>
     </header>

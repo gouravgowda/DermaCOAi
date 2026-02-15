@@ -37,7 +37,7 @@ export function getRiskColor(risk: number | string): string {
     case 'low':
       return 'text-risk-low'
     default:
-      return 'text-gray-500'
+      return 'text-white/40'
   }
 }
 
@@ -52,7 +52,7 @@ export function getRiskBg(risk: string): string {
     case 'low':
       return 'bg-risk-low/10 border-risk-low/30'
     default:
-      return 'bg-gray-100 border-gray-300'
+      return 'bg-white/[0.06] border-white/[0.1]'
   }
 }
 

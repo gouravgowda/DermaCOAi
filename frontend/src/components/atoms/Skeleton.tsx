@@ -12,8 +12,8 @@ export function Skeleton({ className, lines = 3 }: SkeletonProps) {
         <div
           key={i}
           className={cn(
-            'h-4 rounded-md bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:2000px_100%] animate-shimmer',
-            i === lines - 1 && 'w-3/4' // last line is shorter for realism
+            'h-4 rounded-md bg-gradient-to-r from-white/[0.06] via-white/[0.03] to-white/[0.06] bg-[length:2000px_100%] animate-shimmer',
+            i === lines - 1 && 'w-3/4'
           )}
         />
       ))}
@@ -23,14 +23,14 @@ export function Skeleton({ className, lines = 3 }: SkeletonProps) {
 
 export function ProtocolSkeleton() {
   return (
-    <div className="bg-white rounded-lg border-l-4 border-gray-200 p-4 space-y-4">
-      <div className="h-6 w-48 rounded bg-gray-200 animate-shimmer bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:2000px_100%]" />
+    <div className="card border-l-4 border-white/[0.08] space-y-4">
+      <div className="h-6 w-48 rounded bg-gradient-to-r from-white/[0.06] via-white/[0.03] to-white/[0.06] bg-[length:2000px_100%] animate-shimmer" />
       <Skeleton lines={4} />
-      <div className="h-px bg-gray-100" />
+      <div className="h-px bg-white/[0.06]" />
       <Skeleton lines={3} />
       <div className="mt-4 flex gap-2">
-        <div className="h-12 w-40 rounded-lg bg-gray-200 animate-shimmer bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:2000px_100%]" />
-        <div className="h-12 w-32 rounded-lg bg-gray-200 animate-shimmer bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:2000px_100%]" />
+        <div className="h-12 w-40 rounded-lg bg-gradient-to-r from-white/[0.06] via-white/[0.03] to-white/[0.06] bg-[length:2000px_100%] animate-shimmer" />
+        <div className="h-12 w-32 rounded-lg bg-gradient-to-r from-white/[0.06] via-white/[0.03] to-white/[0.06] bg-[length:2000px_100%] animate-shimmer" />
       </div>
     </div>
   )

@@ -5,10 +5,6 @@ import { cn } from '@/lib/utils'
 //
 // Shows animated brackets + quality indicator while capturing.
 // States: searching (amber), adjusting (amber), optimal (green).
-//
-// TODO: The bracket animation is pure CSS — add a "hold steady" vibration
-//   feedback when transitioning to optimal. Works on Android via
-//   navigator.vibrate() but iOS needs the Haptic API.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface GuidanceOverlayProps {
@@ -19,16 +15,16 @@ interface GuidanceOverlayProps {
 
 export function GuidanceOverlay({ confidence, guidance, className }: GuidanceOverlayProps) {
   const qualityColor =
-    guidance === 'optimal' ? 'text-risk-low' :
-    guidance === 'adjusting' ? 'text-risk-medium' : 'text-risk-medium'
+    guidance === 'optimal' ? 'text-emerald-400' :
+    guidance === 'adjusting' ? 'text-amber-400' : 'text-amber-400'
 
   const qualityBg =
-    guidance === 'optimal' ? 'bg-emerald-50 border-emerald-200' :
-    guidance === 'adjusting' ? 'bg-amber-50 border-amber-200' : 'bg-amber-50 border-amber-200'
+    guidance === 'optimal' ? 'bg-emerald-500/15 border-emerald-500/20' :
+    guidance === 'adjusting' ? 'bg-amber-500/15 border-amber-500/20' : 'bg-amber-500/15 border-amber-500/20'
 
   const bracketColor =
-    guidance === 'optimal' ? 'stroke-risk-low' :
-    guidance === 'adjusting' ? 'stroke-risk-medium' : 'stroke-risk-medium'
+    guidance === 'optimal' ? 'stroke-emerald-400' :
+    guidance === 'adjusting' ? 'stroke-amber-400' : 'stroke-amber-400'
 
   const qualityText =
     guidance === 'optimal' ? '✅ Optimal — Tap to capture' :
@@ -56,10 +52,10 @@ export function GuidanceOverlay({ confidence, guidance, className }: GuidanceOve
         </path>
       </svg>
 
-      {/* Quality indicator pill */}
+      {/* Quality indicator pill — glass */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
         <div className={cn(
-          'px-4 py-2 rounded-full border text-sm font-medium shadow-clinical flex items-center gap-2',
+          'px-4 py-2 rounded-full border text-sm font-medium backdrop-blur-xl flex items-center gap-2',
           qualityBg, qualityColor
         )}>
           <span>{qualityText}</span>

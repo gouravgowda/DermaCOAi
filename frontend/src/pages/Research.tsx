@@ -1,271 +1,148 @@
-import { useState, useEffect, useMemo } from 'react'
-import { generateMockPhcs } from '@/assets/mock-data/mock-patients'
-import { MetricCard } from '@/components/molecules/MetricCard'
+import { useState } from 'react'
+import { Search, Filter, BookOpen, Share2, ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/components/atoms/Badge'
-import { cn } from '@/lib/utils'
-import {
-  Globe2,
-  Activity,
-  Users,
-  TrendingUp,
-  Cpu,
-  Lock,
-  Radio,
-  Zap,
-} from 'lucide-react'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Research.tsx — Federated Learning Dashboard
-//
-// Shows how the model learns from distributed PHC data without moving patient
-// records. Key for DPDP Act compliance.
-//
-// The map visualization uses a simplified SVG of India.
-// Coordinates in mock-patients.ts are roughly accurate for Gujarat districts.
-// ─────────────────────────────────────────────────────────────────────────────
+interface Article {
+  id: number
+  title: string
+  category: string
+  author: string
+  date: string
+  readTime: string
+  image: string
+  summary: string
+}
 
 export function Research() {
-  const mockPhcs = useMemo(() => generateMockPhcs(), [])
-  const [modelVersion, setModelVersion] = useState(3.42)
-  const [accuracy, setAccuracy] = useState(94.3)
-  const [totalPatients, setTotalPatients] = useState(12000)
-  const [lastContribution, setLastContribution] = useState('')
-  const [activePulse, setActivePulse] = useState<number | null>(null)
-  const [nextAggregationTime, setNextAggregationTime] = useState(0)
+  const [activeCategory, setActiveCategory] = useState<'all' | 'clinical' | 'academic'>('all')
 
-  useEffect(() => {
-    setNextAggregationTime(Math.floor(Math.random() * 30 + 10))
-  }, [])
-
-  // Simulate federated learning rounds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setModelVersion((v) => +(v + 0.01).toFixed(2))
-      setAccuracy((a) => +(Math.min(a + Math.random() * 0.05, 99.9)).toFixed(1))
-      setTotalPatients((p) => p + Math.floor(Math.random() * 5) + 1)
-
-      const randomPhc = mockPhcs[Math.floor(Math.random() * mockPhcs.length)]
-      setLastContribution(`${randomPhc.name} contributed ${randomPhc.patients} gradients`)
-      setActivePulse(Math.floor(Math.random() * mockPhcs.length))
-
-      // Clear pulse after animation
-      setTimeout(() => setActivePulse(null), 1000)
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [mockPhcs])
-
-  const activeNodes = mockPhcs.filter((n) => n.status === 'active').length
-  const syncingNodes = mockPhcs.filter((n) => n.status === 'syncing').length
+  const articles: Article[] = [
+    {
+      id: 1,
+      title: 'Advanced Wound Care Solutions for Chronic Ulcers',
+      category: 'Clinical',
+      author: 'Dr. Sarah Chen',
+      date: 'Mar 15, 2024',
+      readTime: '5 min read',
+      image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80',
+      summary: 'New protocols using alginate dressings show 40% faster healing in diabetic foot ulcers.'
+    },
+    {
+      id: 2,
+      title: 'AI in Dermatology: The Future of Diagnostics',
+      category: 'Academic',
+      author: 'Prof. James Wilson',
+      date: 'Mar 12, 2024',
+      readTime: '8 min read',
+      image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&q=80',
+      summary: 'A comprehensive review of convolutional neural networks in detecting melanoma patterns.'
+    },
+    {
+      id: 3,
+      title: 'Pediatric Wound Management Guidelines',
+      category: 'Clinical',
+      author: 'Dr. Emily R.',
+      date: 'Mar 10, 2024',
+      readTime: '6 min read',
+      image: 'https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?auto=format&fit=crop&q=80',
+      summary: 'Updated guidelines for managing acute burns in pediatric patients under 5 years.'
+    }
+  ]
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-6">
+    <div className="min-h-screen bg-slate-50 pt-20 pb-24">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 rounded-full bg-accent-teal-500 animate-pulse" />
-          <span className="text-xs text-accent-teal-500 font-medium tracking-wider uppercase">
-            Federated Learning Network
-          </span>
-        </div>
-        <h2 className="text-2xl font-bold text-neutral-800">Research Dashboard</h2>
-        <p className="text-sm text-neutral-500 mt-1">
-          Privacy-preserving model training across India's PHC network. No raw data leaves the device.
-        </p>
-      </div>
-
-      {/* Metrics grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <MetricCard
-          label="Model Version"
-          value={`v${modelVersion}`}
-          icon={<Cpu className="w-5 h-5" />}
-        />
-        <MetricCard
-          label="Global Accuracy"
-          value={`${accuracy}%`}
-          change={0.4}
-          icon={<TrendingUp className="w-5 h-5" />}
-        />
-        <MetricCard
-          label="Patients Trained"
-          value={totalPatients.toLocaleString('en-IN')}
-          change={12.5}
-          icon={<Users className="w-5 h-5" />}
-        />
-        <MetricCard
-          label="Active Nodes"
-          value={`${activeNodes}/${mockPhcs.length}`}
-          icon={<Radio className="w-5 h-5" />}
-        />
-      </div>
-
-      {/* Map and activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* India Map Visualization */}
-        <div className="lg:col-span-2 card !p-0 overflow-hidden">
-          <div className="p-4 pb-2 flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-800 flex items-center gap-2">
-                <Globe2 className="w-4 h-4 text-accent-teal-500" />
-                PHC Network Map
-              </h3>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                {mockPhcs.length} Primary Health Centres across 9 states
-              </p>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1 text-neutral-600">
-                <div className="w-2 h-2 rounded-full bg-accent-teal-500" />
-                Active ({activeNodes})
-              </span>
-              <span className="flex items-center gap-1 text-neutral-600">
-                <div className="w-2 h-2 rounded-full bg-risk-medium animate-pulse" />
-                Syncing ({syncingNodes})
-              </span>
-            </div>
-          </div>
-
-          {/* SVG Map of India with dots */}
-          <div className="relative bg-medical-blue-50/50 p-4" style={{ minHeight: '400px' }}>
-            <svg
-              viewBox="65 5 40 40"
-              className="w-full h-full"
-              style={{ minHeight: '380px' }}
-            >
-              {/* India outline (simplified) */}
-              <path
-                d="M75,8 L82,8 L88,10 L92,14 L94,18 L95,22 L93,26 L90,28 L88,32 L85,35 L82,38 L78,40 L76,37 L72,34 L70,30 L68,26 L67,22 L68,18 L70,14 L72,10 Z"
-                fill="none"
-                stroke="#00B6C7"
-                strokeWidth="0.15"
-                opacity="0.3"
-              />
-
-              {/* PHC dots */}
-              {mockPhcs.map((phc, i) => {
-                const isActive = activePulse === i
-                return (
-                  <g key={phc.id}>
-                    <circle
-                      cx={phc.lng / 1.15 + 2}
-                      cy={(phc.lat - 5) * -1 + 35}
-                      r={isActive ? 0.4 : 0.15}
-                      fill={
-                        phc.status === 'active'
-                          ? '#00B6C7'
-                          : phc.status === 'syncing'
-                          ? '#F59E0B'
-                          : '#9CA3AF'
-                      }
-                      opacity={phc.status === 'offline' ? 0.3 : 0.8}
-                      className={cn(isActive && 'animate-pulse-teal')}
-                    >
-                      {isActive && (
-                        <animate
-                          attributeName="r"
-                          from="0.15"
-                          to="0.6"
-                          dur="1s"
-                          fill="freeze"
-                        />
-                      )}
-                    </circle>
-                    {isActive && (
-                      <circle
-                        cx={phc.lng / 1.15 + 2}
-                        cy={(phc.lat - 5) * -1 + 35}
-                        r="0.8"
-                        fill="none"
-                        stroke="#00B6C7"
-                        strokeWidth="0.05"
-                        opacity="0.5"
-                      >
-                        <animate
-                          attributeName="r"
-                          from="0.3"
-                          to="1.2"
-                          dur="1s"
-                          fill="freeze"
-                        />
-                        <animate
-                          attributeName="opacity"
-                          from="0.6"
-                          to="0"
-                          dur="1s"
-                          fill="freeze"
-                        />
-                      </circle>
-                    )}
-                  </g>
-                )
-              })}
-            </svg>
+      <div className="bg-white border-b border-slate-200 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">Research & Clinical Hub</h1>
+          <p className="text-slate-600 max-w-2xl text-lg">
+            Access the latest medical research, clinical guidelines, and AI-driven insights for dermatological care.
+          </p>
+          
+          <div className="mt-8 flex gap-4 max-w-xl">
+             <div className="relative flex-1">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+               <input 
+                 type="text" 
+                 placeholder="Search articles, guidelines..." 
+                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+               />
+             </div>
+             <button className="px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-2 text-slate-700 font-medium">
+               <Filter className="w-5 h-5" />
+               Filters
+             </button>
           </div>
         </div>
+      </div>
 
-        {/* Activity Feed */}
-        <div className="space-y-4">
-          {/* Privacy card */}
-          <div className="card-glass border-accent-teal-500/20">
-            <div className="flex items-center gap-2 mb-2">
-              <Lock className="w-4 h-4 text-accent-teal-500" />
-              <h3 className="text-sm font-semibold text-neutral-800">Privacy Guarantee</h3>
-            </div>
-            <p className="text-xs text-neutral-500 leading-relaxed">
-              Only model gradients are shared – never raw patient images or data.
-              Compliant with DPDP Act 2023 and ICMR guidelines.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              <Badge variant="info">Differential Privacy</Badge>
-              <Badge variant="info">Secure Aggregation</Badge>
-              <Badge variant="info">DPDP Compliant</Badge>
-            </div>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+          {['all', 'clinical', 'academic', 'guidelines', 'case-studies'].map((cat) => (
+             <button
+               key={cat}
+               onClick={() => setActiveCategory(cat as any)}
+               className={`px-4 py-2 rounded-full text-sm font-semibold capitalize whitespace-nowrap transition-all ${
+                 activeCategory === cat 
+                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                   : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
+               }`}
+             >
+               {cat.replace('-', ' ')}
+             </button>
+          ))}
+        </div>
 
-          {/* Latest contribution */}
-          <div className="card">
-            <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-accent-teal-500" />
-              Latest Activity
-            </h3>
-            {lastContribution && (
-              <div className="p-3 rounded-lg bg-accent-teal-50 border border-accent-teal-100 animate-fade-in">
-                <p className="text-xs text-neutral-600">{lastContribution}</p>
-                <p className="text-[10px] text-neutral-400 mt-1">Just now</p>
-              </div>
-            )}
-          </div>
-
-          {/* Training stats */}
-          <div className="card">
-            <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-accent-teal-500" />
-              Training Progress
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-neutral-500">Round Progress</span>
-                  <span className="font-mono text-neutral-800">87%</span>
-                </div>
-                <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-accent-teal-500 rounded-full transition-all duration-1000" style={{ width: '87%' }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-neutral-500">Convergence</span>
-                  <span className="font-mono text-neutral-800">92%</span>
-                </div>
-                <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-risk-low rounded-full transition-all duration-1000" style={{ width: '92%' }} />
-                </div>
-              </div>
-              <div className="pt-2 border-t border-neutral-100 text-xs text-neutral-400">
-                Next aggregation in ~{nextAggregationTime}s
-              </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {articles.map((article) => (
+            <div key={article.id} className="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+               <div className="relative h-48 overflow-hidden">
+                 <img 
+                   src={article.image} 
+                   alt={article.title} 
+                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                 />
+                 <div className="absolute top-4 left-4">
+                   <Badge variant="info" className="bg-white/90 backdrop-blur text-blue-700">{article.category}</Badge>
+                 </div>
+               </div>
+               
+               <div className="p-6 flex-1 flex flex-col">
+                 <div className="flex items-center gap-2 text-xs text-slate-400 mb-3">
+                   <span>{article.date}</span>
+                   <span>•</span>
+                   <span>{article.readTime}</span>
+                 </div>
+                 
+                 <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
+                   {article.title}
+                 </h3>
+                 <p className="text-slate-500 text-sm mb-6 flex-1 text-ellipsis overflow-hidden">
+                   {article.summary}
+                 </p>
+                 
+                 <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <span className="text-sm font-medium text-slate-700">{article.author}</span>
+                    <div className="flex gap-2">
+                       <button className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+                         <Share2 className="w-4 h-4" />
+                       </button>
+                       <button className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+                         <BookOpen className="w-4 h-4" />
+                       </button>
+                    </div>
+                 </div>
+               </div>
             </div>
+          ))}
+          
+          {/* Ad / Promo Card */}
+          <div className="bg-blue-600 rounded-2xl p-8 text-white flex flex-col justify-center items-start shadow-xl shadow-blue-600/20">
+             <h3 className="text-2xl font-bold mb-4">Join our Clinical Trial Network</h3>
+             <p className="text-blue-100 mb-8">Contribute to the world's largest dataset of wound imagery and help advance AI diagnostics.</p>
+             <button className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors flex items-center gap-2">
+               Learn More <ArrowUpRight className="w-4 h-4" />
+             </button>
           </div>
         </div>
       </div>
