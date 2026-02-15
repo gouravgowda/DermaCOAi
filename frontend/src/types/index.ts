@@ -26,24 +26,35 @@ export interface WoundImage {
 }
 
 export interface WoundMeasurements {
-  lengthCm: number
-  widthCm: number
-  depthMm: number
-  areaCm2: number
-  perimeterCm: number
+  lengthCm?: number
+  widthCm?: number
+  depthMm?: number
+  areaCm2?: number
+  perimeterCm?: number
+  // Aliases for UI compatibility
+  area?: number
+  depth?: number
+  tissueType?: string
 }
 
 export interface AnalysisResult {
   id: string
-  patientId: string
+  patientId?: string
   imageUrl: string
   timestamp: string
-  woundType: WoundType
+  woundType?: WoundType
   measurements: WoundMeasurements
-  riskAssessment: RiskAssessment
-  tissueComposition: TissueComposition
-  depthData: number[] | null
-  segmentationMask: string | null // base64 encoded mask
+  riskAssessment?: RiskAssessment
+  
+  // Flattened fields for UI
+  riskScore: number
+  factors: string[]
+  treatment: string
+  
+  tissueComposition?: TissueComposition
+  depthMapUrl?: string
+  depthData?: number[] | null
+  segmentationMask?: string | null // base64 encoded mask
 }
 
 export type WoundType =

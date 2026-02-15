@@ -1,16 +1,29 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 
 /**
  * useCamera – manages getUserMedia stream with file-upload fallback
- * Uses a ref for the stream to avoid dependency-induced re-render loops.
  */
-export function useCamera() {
-  const videoRef = useRef<HTMLVideoElement>(null)
+export function useCamera(externalVideoRef?: React.RefObject<HTMLVideoElement | null>) {
+  const internalVideoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = externalVideoRef || internalVideoRef
+  
   const streamRef = useRef<MediaStream | null>(null)
+  const [stream, setStream] = useState<MediaStream | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isReady, setIsReady] = useState(false)
+  const [confidence, setConfidence] = useState(0)
 
-  const startCamera = useCallback(async () => {
+  // Mock confidence update
+  useEffect(() => {
+    if (isReady) {
+      const interval = setInterval(() => {
+        setConfidence(prev => Math.min(prev + 0.1, 0.95))
+      }, 500)
+      return () => clearInterval(interval)
+    }
+  }, [isReady])
+
+  const initializeCamera = useCallback(async () => {
     // Don't start if already running
     if (streamRef.current) return
 
@@ -24,6 +37,7 @@ export function useCamera() {
       })
 
       streamRef.current = mediaStream
+      setStream(mediaStream)
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
@@ -32,6 +46,7 @@ export function useCamera() {
 
       setIsReady(true)
       setError(null)
+      setConfidence(0.2)
     } catch (err) {
       const message =
         err instanceof DOMException && err.name === 'NotAllowedError'
@@ -41,36 +56,46 @@ export function useCamera() {
       setError(message)
       setIsReady(false)
     }
-  }, [])
+  }, [videoRef])
 
   const stopCamera = useCallback(() => {
     const s = streamRef.current
     if (s) {
       s.getTracks().forEach((track) => track.stop())
       streamRef.current = null
+      setStream(null)
       setIsReady(false)
     }
   }, [])
 
-  const captureFrame = useCallback((): string | null => {
+  const captureImage = useCallback(async (): Promise<Blob | null> => {
     if (!videoRef.current) return null
 
-    const canvas = document.createElement('canvas')
-    canvas.width = videoRef.current.videoWidth
-    canvas.height = videoRef.current.videoHeight
-    const ctx = canvas.getContext('2d')
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = videoRef.current!.videoWidth
+      canvas.height = videoRef.current!.videoHeight
+      const ctx = canvas.getContext('2d')
 
-    if (!ctx) return null
-    ctx.drawImage(videoRef.current, 0, 0)
-    return canvas.toDataURL('image/jpeg', 0.9)
-  }, [])
+      if (!ctx) {
+        resolve(null)
+        return
+      }
+      
+      ctx.drawImage(videoRef.current!, 0, 0)
+      canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.9)
+    })
+  }, [videoRef])
 
   return {
     videoRef,
     isReady,
     error,
-    startCamera,
+    stream, // Expose stream state
+    confidence, // Expose mock confidence
+    initializeCamera, // Alias for startCamera
+    startCamera: initializeCamera,
     stopCamera,
-    captureFrame,
+    captureImage,
   }
 }

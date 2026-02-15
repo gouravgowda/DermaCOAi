@@ -12,6 +12,7 @@ interface AnalysisState {
   error: string | null
 
   setAnalysis: (analysis: AnalysisResult) => void
+  setAnalyzing: (isAnalyzing: boolean) => void // Added this
   startAnalysis: (imageUrl: string) => Promise<void>
   clearAnalysis: () => void
 }
@@ -22,6 +23,7 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
   error: null,
 
   setAnalysis: (analysis) => set({ currentAnalysis: analysis, error: null }),
+  setAnalyzing: (isAnalyzing) => set({ isAnalyzing }), // Added implementation
 
   // Simulates ML analysis pipeline – in production this calls the backend
   startAnalysis: async (imageUrl: string) => {
@@ -34,6 +36,10 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
       // Use mock result with the provided image URL
       const result: AnalysisResult = {
         ...mockAnalysisResult,
+        // Ensure missing fields are present for mock
+        riskScore: 0.45, 
+        factors: ['Age > 60', 'Poor circulation'],
+        treatment: mockTreatmentProtocol,
         imageUrl,
         timestamp: new Date().toISOString(),
       }
